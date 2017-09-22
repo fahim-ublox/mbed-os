@@ -22,6 +22,6 @@
 #include "cmsis_nvic.h"
 
 /**  Reference clock in Hz */
-#define CLOCKS_REFERENCE_CLOCK_FREQ   32768
+#define CLOCKS_REFERENCE_CLOCK_FREQ   52000000  // 52 MHz
 
 #endif
