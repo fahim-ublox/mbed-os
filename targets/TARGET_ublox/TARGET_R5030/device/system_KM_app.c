@@ -109,11 +109,11 @@ void SystemInit (void)
     }
 	
     /* Release claim on any pins */  /* These registers are the both the method of claiming a PIO, The PIO’s are specified by five 32 bit registers */
-    PIO_FUNC0_BITCLR = 0xFFFFFFFF;
+    /*PIO_FUNC0_BITCLR = 0xFFFFFFFF;
     PIO_FUNC1_BITCLR = 0xFFFFFFFF;
     PIO_FUNC2_BITCLR = 0xFFFFFFFF;
     PIO_FUNC3_BITCLR = 0xFFFFFFFF;
-    PIO_FUNC4_BITCLR = 0xFFFFFFFF;
+    PIO_FUNC4_BITCLR = 0xFFFFFFFF;*/
 
 	cortex_m7_scs->nvic_iser[0] = 0xFFFFFFFF; /* Disable all IRQ interrupts */ /* nvic_iser: Interupt Clear_Enable register */ 
    
