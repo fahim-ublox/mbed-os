@@ -2336,7 +2336,7 @@ typedef struct {
 #define MAIN_GPV_AHB32_CIPHM_FN_MOD_AHB_REGISTER  					(*(volatile uint32_t *)(MAIN_INTERCONNECT_GPV_BASE + 0x4A028U))
 #define MAIN_GPV_AHB32_CIPHM_IB_FN_MOD_REGISTER  					(*(volatile uint32_t *)(MAIN_INTERCONNECT_GPV_BASE + 0x4A108U))
 
-//_______________________________________________________________________________________________________________________________//
+//________________________________________________________________________________________________________________________________//
 
 /*@}*/ /* end of group KM_Definitions */
 
