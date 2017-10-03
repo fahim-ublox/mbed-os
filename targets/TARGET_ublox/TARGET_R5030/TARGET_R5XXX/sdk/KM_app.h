@@ -221,7 +221,7 @@ typedef struct {
 #include "dl_bpe.h"
 #include "dmac_pl081.h"
 #include "etr_limiter.h"
-#include "hal_debug.h"
+//#include "hal_debug.h"
 #include "hal_device.h"
 #include "hal_memory.h"
 #include "hal_memory_defs.h"
