@@ -163,29 +163,6 @@ APP_CPU_NUM_IRQS = 46
   @{
 */
 
-typedef struct {
-    uint32_t UARTDR;
-    uint32_t UARTRSR;
-    uint32_t res0;
-    uint32_t res1;
-    uint32_t res2;
-    uint32_t res3;
-    uint32_t UARTFR;
-    uint32_t res4;
-    uint32_t UARTILPR;
-    uint32_t UARTIBRD; // Integer baud divider
-    uint32_t UARTFBRD; // Fractional Baud divider
-    uint32_t UARTLCR_H;
-    uint32_t UARTCR;
-    uint32_t UARTIFLS;
-    uint32_t UARTIMSC;
-    uint32_t UARTRIS;
-    uint32_t UARTMIS;
-    uint32_t UARTICR;
-    uint32_t UARTDMACR;
-} uart_ctrl_t;
-
-
 #if defined ( __CC_ARM   )
 #pragma anon_unions
 #endif
@@ -220,7 +197,7 @@ typedef struct {
 #include "dl_bpe.h"
 #include "dmac_pl081.h"
 #include "etr_limiter.h"
-#include "hal_debug.h"
+//#include "hal_debug.h"
 #include "hal_device.h"
 #include "hal_memory.h"
 #include "hal_memory_defs.h"
@@ -291,11 +268,35 @@ typedef struct {
 #endif
 
 /******************************************************************************/
+/*                Device Specific Peripheral registers structures             */
+/******************************************************************************/
+
+/* UART */
+typedef struct {
+    uint32_t UARTDR;
+    uint32_t UARTRSR;
+    uint32_t res0;
+    uint32_t res1;
+    uint32_t res2;
+    uint32_t res3;
+    uint32_t UARTFR;
+    uint32_t res4;
+    uint32_t UARTILPR;
+    uint32_t UARTIBRD; // Integer baud divider
+    uint32_t UARTFBRD; // Fractional Baud divider
+    uint32_t UARTLCR_H;
+    uint32_t UARTCR;
+    uint32_t UARTIFLS;
+    uint32_t UARTIMSC;
+    uint32_t UARTRIS;
+    uint32_t UARTMIS;
+    uint32_t UARTICR;
+    uint32_t UARTDMACR;
+} uart_ctrl_t;
+
+/******************************************************************************/
 /*                         Peripheral memory map                              */
 /******************************************************************************/
-/** @addtogroup KM_MemoryMap KM Memory Mapping
-  @{
-*/
 
 #define RTC_IRQ_TIME_LSBS (*(volatile uint32_t *)(0x40002000))
 #define RTC_IRQ_TIME_LSBS_BITSET (*(volatile uint32_t *)(0x40002400))
@@ -662,22 +663,13 @@ typedef struct {
 #define SWD_PIN_CFG_BITCLR (*(volatile uint32_t *)(0x400008A0))
 #define SWD_PIN_CFG_BITTOG (*(volatile uint32_t *)(0x40000CA0))
 
-
-/*@}*/ /* end of group KM_MemoryMap */
-
-
 /******************************************************************************/
 /*                         Peripheral declaration                             */
 /******************************************************************************/
-/** @addtogroup KM_PeripheralDecl KM Peripheral Declaration
-  @{
-*/
+
 /* UART Defines */
 #define UART0_BASE 0x50003000
 #define UART1_BASE 0x50004000
-/*@}*/ /* end of group KM_PeripheralDecl */
-
-/*@}*/ /* end of group KM_Definitions */
 
 #ifdef __cplusplus
 }
