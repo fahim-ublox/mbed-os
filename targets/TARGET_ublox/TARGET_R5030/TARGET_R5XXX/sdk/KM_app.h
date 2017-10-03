@@ -1620,7 +1620,7 @@ typedef struct {
 #define SPI1_RX_DMA_NEXT_BYTE_COUNT_REGISTER    (*(volatile uint32_t *)(SPI1_CONTROL_BASE + 0X21CU))
 #define SPI1_RX_DMA_RX_DATA_BYTE_COMPARE_REGISTER    (*(volatile uint32_t *)(SPI1_CONTROL_BASE + 0X220U))
 
-//------------------------------------------------ SPI 1 ---------------------------------------------------------//
+//------------------------------------------------ SPI 2 ---------------------------------------------------------//
 #define SPI2_CONTROL_SET_REGISTER    (*(volatile uint32_t *)(SPI2_CONTROL_BASE + 0x000U))
 #define SPI2_CONTROL_CLEAR_SET_REGISTER    (*(volatile uint32_t *)(SPI2_CONTROL_BASE + 0x004U))
 #define SPI2_CONTROL_REGISTER    (*(volatile uint32_t *)(SPI2_CONTROL_BASE + 0x008U))        
