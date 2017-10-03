@@ -127,7 +127,8 @@ APP_CPU_APP_IRQ_ONFI_CAL_IRQn = 41,
 APP_CPU_APP_IRQ_PWRCTRL_WAKEUP_IRQn = 42,
 APP_CPU_APP_IRQ_ETR_LIMITER_THRESHOLD_IRQn = 43,
 APP_CPU_APP_IRQ_USB_WAKEUP_INT_IRQn = 44,
-APP_CPU_NUM_IRQS = 45
+APP_CPU_APP_IRQ_AC_PWR_ALERT_IRQn = 45,
+APP_CPU_NUM_IRQS = 46
 } IRQn_Type;
 
 
@@ -219,7 +220,7 @@ typedef struct {
 #include "dl_bpe.h"
 #include "dmac_pl081.h"
 #include "etr_limiter.h"
-//#include "hal_debug.h"
+#include "hal_debug.h"
 #include "hal_device.h"
 #include "hal_memory.h"
 #include "hal_memory_defs.h"
@@ -269,7 +270,7 @@ typedef struct {
 #include "stm_filter.h"
 #include "stm_stim.h"
 #include "tcu_seqfifo.h"
-#include "tdr_access_unit_apb.h"
+#include "tdr_access_unit.h"
 #include "timer.h"
 #include "tmc.h"
 #include "tpiu.h"
