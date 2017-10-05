@@ -127,7 +127,8 @@ APP_CPU_APP_IRQ_ONFI_CAL_IRQn = 41,
 APP_CPU_APP_IRQ_PWRCTRL_WAKEUP_IRQn = 42,
 APP_CPU_APP_IRQ_ETR_LIMITER_THRESHOLD_IRQn = 43,
 APP_CPU_APP_IRQ_USB_WAKEUP_INT_IRQn = 44,
-APP_CPU_NUM_IRQS = 45
+APP_CPU_APP_IRQ_AC_PWR_ALERT_IRQn = 45,
+APP_CPU_NUM_IRQS = 46
 } IRQn_Type;
 
 
@@ -269,7 +270,7 @@ typedef struct {
 #include "targets/target_ublox/target_r5030/target_r5xxx/sdk/stm_filter.h"
 #include "targets/target_ublox/target_r5030/target_r5xxx/sdk/stm_stim.h"
 #include "targets/target_ublox/target_r5030/target_r5xxx/sdk/tcu_seqfifo.h"
-#include "targets/target_ublox/target_r5030/target_r5xxx/sdk/tdr_access_unit_apb.h"
+#include "targets/target_ublox/target_r5030/target_r5xxx/sdk/tdr_access_unit.h"
 #include "targets/target_ublox/target_r5030/target_r5xxx/sdk/timer.h"
 #include "targets/target_ublox/target_r5030/target_r5xxx/sdk/tmc.h"
 #include "targets/target_ublox/target_r5030/target_r5xxx/sdk/tpiu.h"
