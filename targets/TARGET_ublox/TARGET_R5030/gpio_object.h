@@ -78,56 +78,56 @@ typedef enum {
 } PioPeriphMux;
 
 static const PinToChannel PinChannelMap[] = {
-    {LED0, 0},
+    //{LED0, 0},
     {LED1, 1},
-    {LED2, 2},
+    /*{LED2, 2}, // Commented for SPI testing, will be removed latterly
     {LED3, 3},
     {LED4, 4},
     {LED5, 5},
-    {LED6, 6},
+    {LED6, 6},*/
     {UART1_RX, 42},
     {UART1_TX, 43},
     {UART1_CTS, 44},
     {UART1_RTS, 45},
-    {UART2_RX, 30},
+    /*{UART2_RX, 30}, // Commented for SPI testing, will be removed latterly
     {UART2_TX, 31},
     {I2C_SCL, 50},
-    {I2C_SDA, 51},
+    {I2C_SDA, 51},*/
     {SPI1_MOSI, 3},
     {SPI1_MISO, 4},
     {SPI1_CLK, 5},
     {SPI1_CS, 6},
-    {SPI2_MOSI, 46},
+    /*{SPI2_MOSI, 46}, // Commented for SPI testing, will be removed latterly
     {SPI2_MISO, 47},
     {SPI2_CLK, 48},
-    {SPI2_CS, 49},
+    {SPI2_CS, 49},*/
     {NC, NC}
 };
 
 static const PinToPeripheral PinPeripheralMap[] = {
-    {LED0, PIO_MUX_GPIO},
+    //{LED0, PIO_MUX_GPIO},
     {LED1, PIO_MUX_GPIO},
-    {LED2, PIO_MUX_GPIO},
+    /*{LED2, PIO_MUX_GPIO}, // Commented for SPI testing, will be removed latterly
     {LED3, PIO_MUX_GPIO},
     {LED4, PIO_MUX_GPIO},
     {LED5, PIO_MUX_GPIO},
-    {LED6, PIO_MUX_GPIO},
+    {LED6, PIO_MUX_GPIO},*/
     {UART1_RX, PIO_MUX_PERIPH_0},
     {UART1_TX, PIO_MUX_PERIPH_0},
     {UART1_CTS, PIO_MUX_PERIPH_0},
     {UART1_RTS, PIO_MUX_PERIPH_0},
-    {UART2_RX, PIO_MUX_PERIPH_2},
+    /*{UART2_RX, PIO_MUX_PERIPH_2}, // Commented for SPI testing, will be removed latterly
     {UART2_TX, PIO_MUX_PERIPH_2},
     {I2C_SCL, PIO_MUX_PERIPH_0},
-    {I2C_SDA, PIO_MUX_PERIPH_0},
+    {I2C_SDA, PIO_MUX_PERIPH_0},*/
     {SPI1_MOSI, PIO_MUX_PERIPH_1},
     {SPI1_MISO, PIO_MUX_PERIPH_1},
     {SPI1_CLK, PIO_MUX_PERIPH_1},
     {SPI1_CS, PIO_MUX_PERIPH_1},
-    {SPI2_MOSI, PIO_MUX_PERIPH_0},
+    /*{SPI2_MOSI, PIO_MUX_PERIPH_0}, // Commented for SPI testing, will be removed latterly
     {SPI2_MISO, PIO_MUX_PERIPH_0},
     {SPI2_CLK, PIO_MUX_PERIPH_0},
-    {SPI2_CS, PIO_MUX_PERIPH_0},
+    {SPI2_CS, PIO_MUX_PERIPH_0},*/
     {NC, PIO_MUX_FALSE}
 };
 
