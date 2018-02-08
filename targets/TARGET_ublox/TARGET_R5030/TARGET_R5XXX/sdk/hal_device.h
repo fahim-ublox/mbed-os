@@ -1850,7 +1850,7 @@ static volatile struct uart_s* const app_ss_app_uart2 = (struct uart_s*)(+0x4910
 }
 #endif
 
-struct spi_s;
+struct spi_ss;
 #ifdef __cplusplus
 namespace device {
 #endif
@@ -1858,7 +1858,7 @@ namespace device {
  *SPI Interface 1->
  *SPI Control Registers
 */
-static volatile struct spi_s* const app_ss_app_spi1 = (struct spi_s*)(+0x49102000);
+static volatile struct spi_ss* const app_ss_app_spi1 = (struct spi_ss*)(+0x49102000);
 #ifdef __cplusplus
 }
 #endif
@@ -1870,7 +1870,7 @@ namespace device {
  *SPI Interface 2->
  *SPI Control Registers
 */
-static volatile struct spi_s* const app_ss_app_spi2 = (struct spi_s*)(+0x49103000);
+static volatile struct spi_ss* const app_ss_app_spi2 = (struct spi_ss*)(+0x49103000);
 #ifdef __cplusplus
 }
 #endif
