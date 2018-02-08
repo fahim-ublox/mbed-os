@@ -26,8 +26,7 @@
 uint32_t gpio_set(PinName pin)
 {
 	MBED_ASSERT(pin != (PinName)NC);
-
-	return (uint32_t) 1;
+	return (uint32_t) SUCCESS;
 }
 
 /*****************************************************************************
@@ -50,7 +49,7 @@ void gpio_init(gpio_t *obj, PinName pin)
 
     obj->mask = (1 << (pioChannel & PIO_CHANNEL_SUB_32_MASK));
 
-    mux = pio_periph_muxing_get(pioChannel);
+    mux = pio_periph_muxing_get(obj->pin, PinPeripheralMap);
     MBED_ASSERT(mux != PIO_MUX_FALSE);
 
     status = gpio_periph_mux_set(mux,pioChannel,true);
@@ -65,22 +64,19 @@ void gpio_mode(gpio_t *obj, PinMode mode)
 {
     MBED_ASSERT(obj->pin != (PinName)NC);
 
-    switch (mode)
-    {
+    switch (mode) {
       case PullNone:
     	  obj->reg_base->pio_phdr_0 = obj->mask; // Pull up disable
     	  obj->reg_base->pio_pldr_0 = obj->mask; // Pull down disable
     	  break;
-
       case PullDown:
     	  obj->reg_base->pio_pler_0 = obj->mask; // Set pull down
     	  break;
-
       case PullUp:
     	  obj->reg_base->pio_pher_0 = obj->mask; // Set pull up
     	  break;
-
       default:
+    	  obj->reg_base->pio_pler_0 = obj->mask; // Default mode
     	  break;
     }
 }
@@ -93,20 +89,20 @@ void gpio_dir(gpio_t *obj, PinDirection direction)
 {
     MBED_ASSERT(obj->pin != (PinName)NC);
 
-    switch (direction)
-    {
+    switch (direction) {
       case PIN_INPUT:
     	  obj->reg_base->pio_iner_0 = obj->mask; // Enable input
     	  break;
-
       case PIN_OUTPUT:
     	  obj->reg_base->pio_oer_0 = obj->mask; // Enable output
     	  break;
-
       default:
+    	  MBED_ASSERT("Invalid direction");
+    	  MBED_ASSERT(0);
     	  break;
     }
 }
+
 
 /*****************************************************************************
                             gpio_channel_select:
@@ -114,14 +110,26 @@ void gpio_dir(gpio_t *obj, PinDirection direction)
 *****************************************************************************/
 int gpio_channel_select(PinName pin, const PinToChannel* map)
 {
-    while (map->pin != NC)
-    {
+    while (map->pin != NC) {
         if (map->pin == pin)
             return map->channel;
         map++;
     }
-
     return ERROR;
+}
+
+/*****************************************************************************
+                            pio_periph_muxing_get:
+                         Find out which mux is used
+*****************************************************************************/
+PioPeriphMux pio_periph_muxing_get(PinName pin, const PinToPeripheral* map)
+{
+    while (map->pin != NC) {
+        if (map->pin == pin)
+            return map->peripheral;
+        map++;
+    }
+    return PIO_MUX_FALSE;
 }
 
 /*****************************************************************************
@@ -134,40 +142,56 @@ int gpio_periph_mux_set(PioPeriphMux mux, uint8_t pioChannel, bool periphPullUpD
     struct pio_s *pio_channel_regbase;
 
     /*PIO base address */
-    if((pioChannel >> PIO_CHANNEL_OVER_32_SHIFT) == 0)
-    {
+    if((pioChannel >> PIO_CHANNEL_OVER_32_SHIFT) == 0) {
     	pio_channel_regbase = (struct pio_s *)PIO_CONTROL_BASE;
-    }
-    else
-    {
+    }else{
     	pio_channel_regbase = (struct pio_s *)(PIO_CONTROL_BASE + 0x220);
     }
 
 	/*Mux Enable */
-    switch(mux)
-    {
+    switch(mux) {
       case PIO_MUX_GPIO:
     	  pio_channel_regbase->pio_per_0 |= (1 << channel_offset_in_reg);
     	  break;
 
       case PIO_MUX_PERIPH_0:
-    	  pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);
-    	  pio_channel_regbase->pio_asr_0 |= (1 << channel_offset_in_reg);
+    	  pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);     // pio disable
+    	  pio_channel_regbase->pio_asr_0 |= (1 << channel_offset_in_reg);    // mux0 enable
+    	  pio_channel_regbase->pio_odr_0  = (1 << channel_offset_in_reg);    // pad config: output driver disable
+    	  pio_channel_regbase->pio_iner_0 = (1 << channel_offset_in_reg);    // pad config: receiver enable
+    	  pio_channel_regbase->pio_pldr_0 = (1 << channel_offset_in_reg);    // pad config: pulldown disabled
+    	  pio_channel_regbase->pio_phdr_0 = (1 << channel_offset_in_reg);    // pad config: pullup disabled
+    	  pio_channel_regbase->pio_per_0  = (1 << channel_offset_in_reg);    // pio enable
     	  break;
 
       case PIO_MUX_PERIPH_1:
-    	  pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);
-    	  pio_channel_regbase->pio_bsr_0 |= (1 << channel_offset_in_reg);
+    	  pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);     // pio disable
+    	  pio_channel_regbase->pio_bsr_0 |= (1 << channel_offset_in_reg);    // mux0 enable
+    	  pio_channel_regbase->pio_odr_0  = (1 << channel_offset_in_reg);    // pad config: output driver disable
+    	  pio_channel_regbase->pio_iner_0 = (1 << channel_offset_in_reg);    // pad config: receiver enable
+    	  pio_channel_regbase->pio_pldr_0 = (1 << channel_offset_in_reg);    // pad config: pulldown disabled
+    	  pio_channel_regbase->pio_phdr_0 = (1 << channel_offset_in_reg);    // pad config: pullup disabled
+    	  pio_channel_regbase->pio_per_0  = (1 << channel_offset_in_reg);    // pio enable
     	  break;
 
       case PIO_MUX_PERIPH_2:
-    	  pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);
-    	  pio_channel_regbase->pio_csr_0 |= (1 << channel_offset_in_reg);
+    	  pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);     // pio disable
+    	  pio_channel_regbase->pio_csr_0 |= (1 << channel_offset_in_reg);    // mux0 enable
+    	  pio_channel_regbase->pio_odr_0  = (1 << channel_offset_in_reg);    // pad config: output driver disable
+    	  pio_channel_regbase->pio_iner_0 = (1 << channel_offset_in_reg);    // pad config: receiver enable
+    	  pio_channel_regbase->pio_pldr_0 = (1 << channel_offset_in_reg);    // pad config: pulldown disabled
+    	  pio_channel_regbase->pio_phdr_0 = (1 << channel_offset_in_reg);    // pad config: pullup disabled
+    	  pio_channel_regbase->pio_per_0  = (1 << channel_offset_in_reg);    // pio enable
     	  break;
 
       case PIO_MUX_PERIPH_3:
-    	  pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);
-    	  pio_channel_regbase->pio_dsr_0 |= (1 << channel_offset_in_reg);
+    	  pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);     // pio disable
+    	  pio_channel_regbase->pio_dsr_0 |= (1 << channel_offset_in_reg);    // mux0 enable
+    	  pio_channel_regbase->pio_odr_0  = (1 << channel_offset_in_reg);    // pad config: output driver disable
+    	  pio_channel_regbase->pio_iner_0 = (1 << channel_offset_in_reg);    // pad config: receiver enable
+    	  pio_channel_regbase->pio_pldr_0 = (1 << channel_offset_in_reg);    // pad config: pulldown disabled
+    	  pio_channel_regbase->pio_phdr_0 = (1 << channel_offset_in_reg);    // pad config: pullup disabled
+    	  pio_channel_regbase->pio_per_0  = (1 << channel_offset_in_reg);    // pio enable
     	  break;
 
       default:
@@ -175,72 +199,10 @@ int gpio_periph_mux_set(PioPeriphMux mux, uint8_t pioChannel, bool periphPullUpD
     }
 
     /*Peripheral Pull UP/Down */
-    if(periphPullUpDownOn)
-    {
+    if(periphPullUpDownOn) {
     	pio_channel_regbase->pio_percper_0 = (1 << channel_offset_in_reg);
-    }
-    else
-    {
+    } else {
     	pio_channel_regbase->pio_percpdr_0 = (1 << channel_offset_in_reg);
     }
-
     return SUCCESS;
-}
-
-/*****************************************************************************
-                            pio_periph_muxing_get:
-                         Find out which mux is used
-*****************************************************************************/
-PioPeriphMux pio_periph_muxing_get(uint8_t pioChannel)
-{
-    uint8_t muxSel;
-    PioPeriphMux mux = PIO_MUX_FALSE;
-    struct pio_s *pio_channel_regbase;
-    uint8_t channel_offset_in_reg = (pioChannel & PIO_CHANNEL_SUB_32_MASK);
-
-    /*PIO base address */
-    if((pioChannel >> PIO_CHANNEL_OVER_32_SHIFT) == 0)
-    {
-    	pio_channel_regbase = (struct pio_s *)PIO_CONTROL_BASE;
-    }
-    else
-    {
-    	pio_channel_regbase = (struct pio_s *)(PIO_CONTROL_BASE + 0x220);
-    }
-
-
-    if(PIO_CHANNEL_BIT_GET(pio_channel_regbase->pio_psr_0, channel_offset_in_reg) == 1)
-    {
-    	mux = PIO_MUX_GPIO;
-    }
-    else /* configured for peripheral - find out which one */
-    {
-    	muxSel = (uint8_t)((PIO_CHANNEL_BIT_GET(pio_channel_regbase->pio_mselsr_0, channel_offset_in_reg) << 1) | PIO_CHANNEL_BIT_GET(pio_channel_regbase->pio_lselsr_0, channel_offset_in_reg));
-
-       /*Selecting mux */
-       switch(muxSel)
-       {
-         case 0:
-             mux = PIO_MUX_PERIPH_0;
-             break;
-			 
-         case 1:
-             mux = PIO_MUX_PERIPH_1;
-             break;
-			 
-         case 2:
-             mux = PIO_MUX_PERIPH_2;
-             break;
-			 
-         case 3:
-             mux = PIO_MUX_PERIPH_3;
-             break;
-			 
-         default:
-             return mux;
-       }
-
-    }
-
-    return mux;
 }
