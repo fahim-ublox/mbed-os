@@ -92,20 +92,20 @@ void spi_free(spi_t *obj)
 *****************************************************************************/
 void spi_format(spi_t *obj, int bits, int mode, int slave)
 {
-	if(slave == 0) {
-		obj->reg_base->cr |= SPI_CR_CR_MASTER_MASTER_MODE_VALUE << SPI_CR_CR_MASTER_OFFSET; // Master Mode Selected
-	} else {
-		obj->reg_base->cr |= SPI_CR_CR_MASTER_SLAVE_MODE_VALUE << SPI_CR_CR_MASTER_OFFSET; // Slave Mode Selected
-	}
+    if(slave == 0) {
+        obj->reg_base->cr |= SPI_CR_CR_MASTER_MASTER_MODE_VALUE << SPI_CR_CR_MASTER_OFFSET; // Master Mode Selected
+    } else {
+        obj->reg_base->cr |= SPI_CR_CR_MASTER_SLAVE_MODE_VALUE << SPI_CR_CR_MASTER_OFFSET; // Slave Mode Selected
+    }
 	
 	// only 8-bit word length supported, 9-bit mode (1 status bit + 8 data bits) to implement flow control
     MBED_ASSERT(bits == 8 || bits == 9);
 	
-	if(bits == 8) {
-		obj->reg_base->cr |= SPI_CR_CR_FLOWCTRL_NORMAL_OPERATION_VALUE << SPI_CR_CR_FLOWCTRL_OFFSET;
-	} else {
-		obj->reg_base->cr |= SPI_CR_CR_FLOWCTRL_FLOW_CONTROL_9_BIT_MODE_ENABLED_VALUE << SPI_CR_CR_FLOWCTRL_OFFSET;
-	}
+    if(bits == 8) {
+        obj->reg_base->cr |= SPI_CR_CR_FLOWCTRL_NORMAL_OPERATION_VALUE << SPI_CR_CR_FLOWCTRL_OFFSET;
+    } else {
+        obj->reg_base->cr |= SPI_CR_CR_FLOWCTRL_FLOW_CONTROL_9_BIT_MODE_ENABLED_VALUE << SPI_CR_CR_FLOWCTRL_OFFSET;
+    }
 		
     switch (mode) {
         case 0:
@@ -135,31 +135,31 @@ void spi_format(spi_t *obj, int bits, int mode, int slave)
 *****************************************************************************/
 void spi_frequency(spi_t *obj, int hz)
 {
-	uint8_t clockDiv = 0, p_waitDiv = 0;
-	uint32_t dataSize;
+    uint8_t clockDiv = 0, p_waitDiv = 0;
+    uint32_t dataSize;
 	
-	if(bit_status(obj->reg_base->cr, SPI_CR_CR_MASTER_OFFSET)) {
-		MBED_ASSERT(hz <= MAX_FREQ); // The maximum bus clock speed in Master mode shall be 26 MHz
-	} else {
-		MBED_ASSERT(hz >= MIN_FREQ); // Bus-clock speed in Slave mode shall not be less than 13 MHz.
-	}
+    if(bit_status(obj->reg_base->cr, SPI_CR_CR_MASTER_OFFSET)) {
+        MBED_ASSERT(hz <= MAX_FREQ); // The maximum bus clock speed in Master mode shall be 26 MHz
+    } else {
+        MBED_ASSERT(hz >= MIN_FREQ); // Bus-clock speed in Slave mode shall not be less than 13 MHz.
+    }
 
-	clockDiv = (PCLK / (2 * hz)) - 1;
-	if(clockDiv < 0xFF) {
-		obj->reg_base->cdr = clockDiv; // Clock divider register: SCLK period = 2*(<ClockDiv>+1)/PCLK
-	} else {
-		MBED_ASSERT("Invalid Clock Divider");
-	}
+    clockDiv = (PCLK / (2 * hz)) - 1;
+    if(clockDiv < 0xFF) {
+        obj->reg_base->cdr = clockDiv; // Clock divider register: SCLK period = 2*(<ClockDiv>+1)/PCLK
+    } else {
+        MBED_ASSERT("Invalid Clock Divider");
+    }
 
-	obj->reg_base->tor = 0xFF; // Timeout counter register: timeout = 8*(<ClockDiv>+1)*<timeout>/ PCLK 
+    obj->reg_base->tor = 0xFF; // Timeout counter register: timeout = 8*(<ClockDiv>+1)*<timeout>/ PCLK 
 
-	p_waitDiv = PCLK / 1000 * 6 / (clockDiv + 1) / 1000; // 6us wait
-	if(clockDiv < 0xFF) {
-		obj->reg_base->wsr = p_waitDiv - 1; 
-		obj->reg_base->wgr = p_waitDiv - 1; 
-	} else {
-		MBED_ASSERT("Invalid Wait Divider");
-	}
+    p_waitDiv = PCLK / 1000 * 6 / (clockDiv + 1) / 1000; // 6us wait
+    if(clockDiv < 0xFF) {
+        obj->reg_base->wsr = p_waitDiv - 1; 
+        obj->reg_base->wgr = p_waitDiv - 1; 
+    } else {
+        MBED_ASSERT("Invalid Wait Divider");
+    }
 			
     dataSize = bit_status(obj->reg_base->cr, SPI_CR_CR_FLOWCTRL_OFFSET) == SPI_CR_CR_MASTER_MASTER_MODE_VALUE ? 8 : 9;
     obj->timeout = ((8 * 2 + (obj->reg_base->wgr + 1)) * dataSize + (obj->reg_base->wsr + 1)) * (obj->reg_base->cdr + 1)/(MAX_FREQ / 1000); //duration in us
@@ -171,10 +171,10 @@ void spi_frequency(spi_t *obj, int hz)
 *****************************************************************************/
 int spi_master_write(spi_t *obj, int value)
 {	
-	obj->reg_base->thr = (uint8_t)value;
-	while(!(bit_status(obj->reg_base->sr, SPI_SR_SR_TXEMPTY_OFFSET))); // Wait for TX buffer empty
+    obj->reg_base->thr = (uint8_t)value;
+    while(!(bit_status(obj->reg_base->sr, SPI_SR_SR_TXEMPTY_OFFSET))); // Wait for TX buffer empty
 
-	return  obj->reg_base->rhr;
+    return  obj->reg_base->rhr;
 }
 
 /*****************************************************************************
@@ -183,8 +183,8 @@ int spi_master_write(spi_t *obj, int value)
 *****************************************************************************/
 int spi_master_block_write(spi_t *obj, const char *tx_buffer, int tx_length, char *rx_buffer, int rx_length, char write_fill)
 {
-	char in,out;
-	int total = (tx_length > rx_length) ? tx_length : rx_length;
+    char in,out;
+    int total = (tx_length > rx_length) ? tx_length : rx_length;
 	
     for (int i = 0; i < total; i++) {
         out = (i < tx_length) ? tx_buffer[i] : write_fill;
@@ -225,8 +225,8 @@ int spi_slave_read(spi_t *obj)
 *****************************************************************************/
 void spi_slave_write(spi_t *obj, int value)
 {
-	obj->reg_base->thr = value;
-	while(!(bit_status(obj->reg_base->sr, SPI_SR_SR_TXEMPTY_OFFSET))); // Wait for TX buffer empty
+    obj->reg_base->thr = value;
+    while(!(bit_status(obj->reg_base->sr, SPI_SR_SR_TXEMPTY_OFFSET))); // Wait for TX buffer empty
 }
 	
 /*****************************************************************************

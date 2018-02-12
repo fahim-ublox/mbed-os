@@ -25,8 +25,8 @@
 *****************************************************************************/
 uint32_t gpio_set(PinName pin)
 {
-	MBED_ASSERT(pin != (PinName)NC);
-	return (uint32_t) SUCCESS;
+    MBED_ASSERT(pin != (PinName)NC);
+    return (uint32_t) SUCCESS;
 }
 
 /*****************************************************************************
