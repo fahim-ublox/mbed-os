@@ -62,8 +62,6 @@
 
 
 //PIO channels used by I2C0 bus
-#define PIO_CHANNEL_SUB_32_MASK       (0x1F)
-#define PIO_CHANNEL_OVER_32_SHIFT     (5)
 
 #define I2C1SclxCIO_CHANNEL    (50)
 #define I2C1SdaxSIO_CHANNEL    (51)
@@ -275,6 +273,7 @@ int i2c_read(i2c_t *obj, int address, char *data, int length, int stop)
     uint32_t timeout = MAX_TIMEOUT;
     int bytes_read=0;
     uint32_t rxFifoBytes=0;
+    uint32_t status;
 
     /* check if bus is busy */
     if (is_bus_busy(obj))
@@ -333,19 +332,19 @@ int i2c_read(i2c_t *obj, int address, char *data, int length, int stop)
        timeout=MAX_TIMEOUT;
        while (timeout) 
        {
-           status=obj->reg_base->sr
-           if(DRIVER_BITFIELD_GET(status, I2C_SR_TXEMPTY)  /* fifo empty i.e transfer complete, put in more data */        
+           status=obj->reg_base->sr;
+           if(DRIVER_BITFIELD_GET(status, I2C_SR_TXEMPTY))  /* fifo empty i.e transfer complete, put in more data */
            {            
                break;
            }
-           else if ( (status &  ERROR_BITS) || time_out <= 0)  
+           else if ( (status &  ERROR_BITS) || timeout <= 0)
            {
-               obj->p_regBase->crset = DRIVER_BITFIELD_MASK(I2C_CR_STOP);
+               obj->reg_base->crset = DRIVER_BITFIELD_MASK(I2C_CR_STOP);
                return -1; /* FIXME: return error or number of bytes transferred that already? */
            }
            timeout--;
        }
-      timeout--;
+      //timeout--;
     }
     /* send stop if stop == true */
     if (stop)
