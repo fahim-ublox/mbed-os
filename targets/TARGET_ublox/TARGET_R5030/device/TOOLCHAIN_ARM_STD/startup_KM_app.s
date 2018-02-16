@@ -1,40 +1,29 @@
 ;/**************************************************************************//**
 ; * @file     startup_KM_app.s
-; * @brief    CMSIS Cortex-M7 Core Device Startup File for
+; * @brief    CMSIS Cortex-M ARMv7-M based Core Device Startup File for
 ; *           Device KM
-; * @version  V3.10
-; * @date     23. November 2012
-; *
-; * @note
-; *
+; * @version  V5.00
+; * @date     02. March 2016
 ; ******************************************************************************/
-;/* Copyright (c) 2012 ARM LIMITED
-;
-;   All rights reserved.
-;   Redistribution and use in source and binary forms, with or without
-;   modification, are permitted provided that the following conditions are met:
-;   - Redistributions of source code must retain the above copyright
-;     notice, this list of conditions and the following disclaimer.
-;   - Redistributions in binary form must reproduce the above copyright
-;     notice, this list of conditions and the following disclaimer in the
-;     documentation and/or other materials provided with the distribution.
-;   - Neither the name of ARM nor the names of its contributors may be used
-;     to endorse or promote products derived from this software without
-;     specific prior written permission.
-;   *
-;   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-;   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-;   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-;   ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
-;   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-;   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-;   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-;   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-;   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-;   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-;   POSSIBILITY OF SUCH DAMAGE.
-;   ---------------------------------------------------------------------------*/
 ;/*
+; * Copyright (c) 2009-2016 ARM Limited. All rights reserved.
+; *
+; * SPDX-License-Identifier: Apache-2.0
+; *
+; * Licensed under the Apache License, Version 2.0 (the License); you may
+; * not use this file except in compliance with the License.
+; * You may obtain a copy of the License at
+; *
+; * www.apache.org/licenses/LICENSE-2.0
+; *
+; * Unless required by applicable law or agreed to in writing, software
+; * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+; * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; * See the License for the specific language governing permissions and
+; * limitations under the License.
+; */
+;/*
+
 ;//-------- <<< Use Configuration Wizard in Context Menu >>> ------------------
 ;*/
 
@@ -91,54 +80,52 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     SysTick_Handler           ; SysTick Handler
 
                 ; External Interrupts
-    DCD APP_CPU_APP_IRQ_CTIIRQ0_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_CTIIRQ1_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_I2C1_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_I2C2_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_I2C3_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_I2S_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_UART1_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_UART2_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_SPI1_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_SPI2_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_TIMER1_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_TIMER2_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_MDM_WDG_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_PHY_WDG_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_RF_WDG_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_SYSCTRL_ERR_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_SYSCTRL_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_DMAC_ERR_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_DMAC_TC_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_DMAC_COMB_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_SDIO_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_OSPI_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_PSRAM_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_CRYPTO_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_DVS_GLB_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_DVS_CORE_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_USB_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_USB_DMA_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_PIO_1_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_PIO_2_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_PIO_WAKEUP_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_PWRCTRL_ERR_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_PWRCTRL_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_BB_IPC_MBX_TX0_IRQHandler
-    DCD APP_CPU_APP_IRQ_BB_IPC_MBX_TX1_IRQHandler
-    DCD APP_CPU_APP_IRQ_BB_IPC_MBX_TX2_IRQHandler
-    DCD APP_CPU_APP_IRQ_BB_IPC_MBX_RX0_IRQHandler
-    DCD APP_CPU_APP_IRQ_BB_IPC_MBX_RX1_IRQHandler
-    DCD APP_CPU_APP_IRQ_BB_IPC_MBX_RX2_IRQHandler
-    DCD APP_CPU_APP_IRQ_GNSS_TIM_IRQHandler
-    DCD APP_CPU_APP_IRQ_OTP_FAULT_IRQHandler
-    DCD APP_CPU_APP_IRQ_ONFI_CAL_IRQHandler
-    DCD APP_CPU_APP_IRQ_PWRCTRL_WAKEUP_IRQHandler
-    DCD APP_CPU_APP_IRQ_ETR_LIMITER_THRESHOLD_IRQHandler
-    DCD APP_CPU_APP_IRQ_USB_WAKEUP_INT_IRQHandler
-    DCD APP_CPU_APP_IRQ_AC_PWR_ALERT_IRQHandler
-
-
+                DCD APP_CPU_APP_IRQ_CTIIRQ0_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_CTIIRQ1_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_I2C1_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_I2C2_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_I2C3_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_I2S_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_UART1_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_UART2_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_SPI1_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_SPI2_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_TIMER1_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_TIMER2_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_MDM_WDG_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_PHY_WDG_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_RF_WDG_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_SYSCTRL_ERR_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_SYSCTRL_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_DMAC_ERR_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_DMAC_TC_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_DMAC_COMB_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_SDIO_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_OSPI_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_PSRAM_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_CRYPTO_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_DVS_GLB_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_DVS_CORE_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_USB_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_USB_DMA_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_PIO_1_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_PIO_2_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_PIO_WAKEUP_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_PWRCTRL_ERR_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_PWRCTRL_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_BB_IPC_MBX_TX0_IRQHandler
+                DCD APP_CPU_APP_IRQ_BB_IPC_MBX_TX1_IRQHandler
+                DCD APP_CPU_APP_IRQ_BB_IPC_MBX_TX2_IRQHandler
+                DCD APP_CPU_APP_IRQ_BB_IPC_MBX_RX0_IRQHandler
+                DCD APP_CPU_APP_IRQ_BB_IPC_MBX_RX1_IRQHandler
+                DCD APP_CPU_APP_IRQ_BB_IPC_MBX_RX2_IRQHandler
+                DCD APP_CPU_APP_IRQ_GNSS_TIM_IRQHandler
+                DCD APP_CPU_APP_IRQ_OTP_FAULT_IRQHandler
+                DCD APP_CPU_APP_IRQ_ONFI_CAL_IRQHandler
+                DCD APP_CPU_APP_IRQ_PWRCTRL_WAKEUP_IRQHandler
+                DCD APP_CPU_APP_IRQ_ETR_LIMITER_THRESHOLD_IRQHandler
+                DCD APP_CPU_APP_IRQ_USB_WAKEUP_INT_IRQHandler
+                DCD APP_CPU_APP_IRQ_AC_PWR_ALERT_IRQHandler
 __Vectors_End
 
 __Vectors_Size  EQU     __Vectors_End - __Vectors
@@ -164,7 +151,8 @@ Reset_Handler   PROC
 
 ; Dummy Exception Handlers (infinite loops which can be modified)
 
-NMI_Handler     PROC
+NMI_Handler\
+                PROC
                 EXPORT  NMI_Handler               [WEAK]
                 B       .
                 ENDP
@@ -188,7 +176,8 @@ UsageFault_Handler\
                 EXPORT  UsageFault_Handler        [WEAK]
                 B       .
                 ENDP
-SVC_Handler     PROC
+SVC_Handler\
+                PROC
                 EXPORT  SVC_Handler               [WEAK]
                 B       .
                 ENDP

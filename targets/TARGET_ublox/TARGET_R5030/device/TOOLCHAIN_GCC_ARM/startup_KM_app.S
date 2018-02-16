@@ -2,99 +2,85 @@
  * @file     startup_KM_app.S
  * @brief    CMSIS Cortex-M7 Core Device Startup File for
  *           Device KM
- * @version  V2.0
- * @date     16. August 2013
- *
- * @note     GCC for ARM Embedded Processors
- *
+ * @version  V5.00
+ * @date     02. March 2016
  ******************************************************************************/
-/* Copyright (c) 2013 ARM LIMITED
+/*
+ * Copyright (c) 2009-2016 ARM Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-   All rights reserved.
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
-   - Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-   - Neither the name of ARM nor the names of its contributors may be used
-     to endorse or promote products derived from this software without
-     specific prior written permission.
-   *
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
-   ---------------------------------------------------------------------------*/
-#define __STARTUP_CLEAR_BSS
 
-    .syntax    unified
-    .arch    armv7e-m
+	.syntax	unified
+	.arch	armv7e-m
 
-    .section .stack
-    .align    3
+	.section .stack
+	.align	3
 #ifdef __STACK_SIZE
-    .equ    Stack_Size, __STACK_SIZE
+	.equ	Stack_Size, __STACK_SIZE
 #else
-    .equ    Stack_Size, 0x00000400
+	.equ	Stack_Size, 0x00000400
 #endif
-    .globl    __StackTop
-    .globl    __StackLimit
+	.globl	__StackTop
+	.globl	__StackLimit
 __StackLimit:
-    .space    Stack_Size
-    .size    __StackLimit, . - __StackLimit
+	.space	Stack_Size
+	.size	__StackLimit, . - __StackLimit
 __StackTop:
-    .size    __StackTop, . - __StackTop
+	.size	__StackTop, . - __StackTop
 
-    .section .heap
-    .align    3
+	.section .heap
+	.align	3
 #ifdef __HEAP_SIZE
-    .equ    Heap_Size, __HEAP_SIZE
+	.equ	Heap_Size, __HEAP_SIZE
 #else
-    .equ    Heap_Size, 0x00000C00
+	.equ	Heap_Size, 0x00000C00
 #endif
-    .globl    __HeapBase
-    .globl    __HeapLimit
+	.globl	__HeapBase
+	.globl	__HeapLimit
 __HeapBase:
-    .if    Heap_Size
-    .space    Heap_Size
-    .endif
-    .size    __HeapBase, . - __HeapBase
+	.if	Heap_Size
+	.space	Heap_Size
+	.endif
+	.size	__HeapBase, . - __HeapBase
 __HeapLimit:
-    .size    __HeapLimit, . - __HeapLimit
+	.size	__HeapLimit, . - __HeapLimit
 
-    .section .isr_vector
-    .align 2
-    .globl    __isr_vector
-__isr_vector:
-    .long    __StackTop            /* Top of Stack */
-    .long    Reset_Handler         /* Reset Handler */
-    .long    NMI_Handler           /* NMI Handler */
-    .long    HardFault_Handler     /* Hard Fault Handler */
-    .long    0                     /* Reserved */
-    .long    0                     /* Reserved */
-    .long    0                     /* Reserved */
-    .long    0                     /* Reserved */
-    .long    0                     /* Reserved */
-    .long    0                     /* Reserved */
-    .long    0                     /* Reserved */
-    .long    SVC_Handler           /* SVCall Handler */
-    .long    0                     /* Reserved */
-    .long    0                     /* Reserved */
-    .long    PendSV_Handler        /* PendSV Handler */
-    .long    SysTick_Handler       /* SysTick Handler */
+	.section .vectors
+	.align	2
+	.globl	__Vectors
+__Vectors:
+	.long	__StackTop            /* Top of Stack */
+	.long	Reset_Handler         /* Reset Handler */
+	.long	NMI_Handler           /* NMI Handler */
+	.long	HardFault_Handler     /* Hard Fault Handler */
+	.long	MemManage_Handler     /* MPU Fault Handler */
+	.long	BusFault_Handler      /* Bus Fault Handler */
+	.long	UsageFault_Handler    /* Usage Fault Handler */
+	.long	0                     /* Reserved */
+	.long	0                     /* Reserved */
+	.long	0                     /* Reserved */
+	.long	0                     /* Reserved */
+	.long	SVC_Handler           /* SVCall Handler */
+	.long	DebugMon_Handler      /* Debug Monitor Handler */
+	.long	0                     /* Reserved */
+	.long	PendSV_Handler        /* PendSV Handler */
+	.long	SysTick_Handler       /* SysTick Handler */
 
-    /* External interrupts */
-/* ToDo:  Add here the vectors for the device specific external interrupts handler */
-/*    .long    <DeviceInterrupt>_IRQHandler              /*  0: Default                  */
+	/* External interrupts */
     .long    APP_CPU_APP_IRQ_CTIIRQ0_INT_IRQHandler
     .long    APP_CPU_APP_IRQ_CTIIRQ1_INT_IRQHandler
     .long    APP_CPU_APP_IRQ_I2C1_INT_IRQHandler
@@ -142,14 +128,14 @@ __isr_vector:
     .long    APP_CPU_APP_IRQ_USB_WAKEUP_INT_IRQHandler
     .long    APP_CPU_APP_IRQ_AC_PWR_ALERT_IRQHandler
 
-    .size    __isr_vector, . - __isr_vector
+	.size	__Vectors, . - __Vectors
 
-    .text
-    .thumb
-    .thumb_func
-    .align    1
-    .globl    Reset_Handler
-    .type    Reset_Handler, %function
+	.text
+	.thumb
+	.thumb_func
+	.align	2
+	.globl	Reset_Handler
+	.type	Reset_Handler, %function
 Reset_Handler:
 /*  Firstly it copies data from read only memory to RAM. There are two schemes
  *  to copy. One can copy more than one sections. Another can only copy
@@ -168,26 +154,25 @@ Reset_Handler:
  *
  *  All addresses must be aligned to 4 bytes boundary.
  */
-    ldr    r4, =__copy_table_start__
-    ldr    r5, =__copy_table_end__
+	ldr	r4, =__copy_table_start__
+	ldr	r5, =__copy_table_end__
 
 .L_loop0:
-    cmp    r4, r5
-    bge    .L_loop0_done
-    ldr    r1, [r4]
-    ldr    r2, [r4, #4]
-    ldr    r3, [r4, #8]
+	cmp	r4, r5
+	bge	.L_loop0_done
+	ldr	r1, [r4]
+	ldr	r2, [r4, #4]
+	ldr	r3, [r4, #8]
 
 .L_loop0_0:
-    subs    r3, #4
-    blt    .L_loop0_0_done
-    ldr    r0, [r1, r3]
-    str    r0, [r2, r3]
-    b    .L_loop0_0
+	subs	r3, #4
+	ittt	ge
+	ldrge	r0, [r1, r3]
+	strge	r0, [r2, r3]
+	bge	.L_loop0_0
 
-.L_loop0_0_done:
-    adds    r4, #12
-    b    .L_loop0
+	adds	r4, #12
+	b	.L_loop0
 
 .L_loop0_done:
 #elif defined (__STARTUP_COPY_DATA)
@@ -200,20 +185,16 @@ Reset_Handler:
  *
  *  All addresses must be aligned to 4 bytes boundary.
  */
-    ldr    r1, =__etext
-    ldr    r2, =__data_start__
-    ldr    r3, =__data_end__
-
-    subs    r3, r2
-    ble    .L_loop1_done
+	ldr	r1, =__etext
+	ldr	r2, =__data_start__
+	ldr	r3, =__data_end__
 
 .L_loop1:
-    subs    r3, #4
-    ldr    r0, [r1,r3]
-    str    r0, [r2,r3]
-    bgt    .L_loop1
-
-.L_loop1_done:
+	cmp	r2, r3
+	ittt	lt
+	ldrlt	r0, [r1], #4
+	strlt	r0, [r2], #4
+	blt	.L_loop1
 #endif /*__STARTUP_COPY_MULTIPLE */
 
 /*  This part of work usually is done in C library startup code. Otherwise,
@@ -234,25 +215,24 @@ Reset_Handler:
  *    offset 0: Start of a BSS section
  *    offset 4: Size of this BSS section. Must be multiply of 4
  */
-    ldr    r3, =__zero_table_start__
-    ldr    r4, =__zero_table_end__
+	ldr	r3, =__zero_table_start__
+	ldr	r4, =__zero_table_end__
 
 .L_loop2:
-    cmp    r3, r4
-    bge    .L_loop2_done
-    ldr    r1, [r3]
-    ldr    r2, [r3, #4]
-    movs    r0, 0
+	cmp	r3, r4
+	bge	.L_loop2_done
+	ldr	r1, [r3]
+	ldr	r2, [r3, #4]
+	movs	r0, 0
 
 .L_loop2_0:
-    subs    r2, #4
-    blt    .L_loop2_0_done
-    str    r0, [r1, r2]
-    b    .L_loop2_0
-.L_loop2_0_done:
+	subs	r2, #4
+	itt	ge
+	strge	r0, [r1, r2]
+	bge	.L_loop2_0
 
-    adds    r3, #8
-    b    .L_loop2
+	adds	r3, #8
+	b	.L_loop2
 .L_loop2_done:
 #elif defined (__STARTUP_CLEAR_BSS)
 /*  Single BSS section scheme.
@@ -263,54 +243,54 @@ Reset_Handler:
  *
  *  Both addresses must be aligned to 4 bytes boundary.
  */
-    ldr    r1, =__bss_start__
-    ldr    r2, =__bss_end__
+	ldr	r1, =__bss_start__
+	ldr	r2, =__bss_end__
 
-    movs    r0, 0
-
-    subs    r2, r1
-    ble    .L_loop3_done
-
+	movs	r0, 0
 .L_loop3:
-    subs    r2, #4
-    str    r0, [r1, r2]
-    bgt    .L_loop3
-.L_loop3_done:
+	cmp	r1, r2
+	itt	lt
+	strlt	r0, [r1], #4
+	blt	.L_loop3
 #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
 
 #ifndef __NO_SYSTEM_INIT
-    bl    SystemInit
+	bl	SystemInit
 #endif
 
 #ifndef __START
 #define __START _start
 #endif
-    bl    __START
+	bl	__START
 
-    .pool
-    .size    Reset_Handler, . - Reset_Handler
+	.pool
+	.size	Reset_Handler, . - Reset_Handler
 
-    .align    1
-    .thumb_func
-    .weak    Default_Handler
-    .type    Default_Handler, %function
+	.align	1
+	.thumb_func
+	.weak	Default_Handler
+	.type	Default_Handler, %function
 Default_Handler:
-    b    .
-    .size    Default_Handler, . - Default_Handler
+	b	.
+	.size	Default_Handler, . - Default_Handler
 
 /*    Macro to define default handlers. Default handler
  *    will be weak symbol and just dead loops. They can be
  *    overwritten by other handlers */
-    .macro    def_irq_handler    handler_name
-    .weak    \handler_name
-    .set    \handler_name, Default_Handler
-    .endm
+	.macro	def_irq_handler	handler_name
+	.weak	\handler_name
+	.set	\handler_name, Default_Handler
+	.endm
 
-    def_irq_handler    NMI_Handler
-    def_irq_handler    HardFault_Handler
-    def_irq_handler    SVC_Handler
-    def_irq_handler    PendSV_Handler
-    def_irq_handler    SysTick_Handler
+	def_irq_handler	NMI_Handler
+	def_irq_handler	HardFault_Handler
+	def_irq_handler	MemManage_Handler
+	def_irq_handler	BusFault_Handler
+	def_irq_handler	UsageFault_Handler
+	def_irq_handler	SVC_Handler
+	def_irq_handler	DebugMon_Handler
+	def_irq_handler	PendSV_Handler
+	def_irq_handler	SysTick_Handler
 
 /* IRQ Handlers */
 
@@ -361,4 +341,6 @@ Default_Handler:
     def_irq_handler APP_CPU_APP_IRQ_USB_WAKEUP_INT_IRQHandler
     def_irq_handler APP_CPU_APP_IRQ_AC_PWR_ALERT_IRQHandler
 
+
     .end
+    
