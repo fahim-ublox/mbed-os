@@ -175,7 +175,7 @@ Reset_Handler:
 	b	.L_loop0
 
 .L_loop0_done:
-#else
+#elif defined (__STARTUP_COPY_DATA)
 /*  Single section scheme.
  *
  *  The ranges of copy from/to are specified by following symbols
@@ -341,4 +341,6 @@ Default_Handler:
     def_irq_handler APP_CPU_APP_IRQ_USB_WAKEUP_INT_IRQHandler
     def_irq_handler APP_CPU_APP_IRQ_AC_PWR_ALERT_IRQHandler
 
-	.end
+
+    .end
+    
