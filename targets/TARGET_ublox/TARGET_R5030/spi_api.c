@@ -77,15 +77,27 @@ static inline uint32_t bit_status(uint32_t x, uint32_t y)
 /*****************************************************************************
                                 spi_init:
                            Initialize the SPI
+
 *****************************************************************************/
 void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel)
 {
 	uint32_t status;
-    /*int pioChannel = 0;
-    PioPeriphMux mux;
-	PinName pinArray[4] = {mosi, miso, sclk, ssel};
+	    int pioChannel = 0;
+	    PioPeriphMux mux;
+		PinName pinArray[4] = {mosi, miso, sclk, ssel};
 
-    MBED_ASSERT(mosi != (PinName)NC && miso != (PinName)NC && sclk != (PinName)NC && ssel != (PinName)NC);
+	    MBED_ASSERT(mosi != (PinName)NC && miso != (PinName)NC && sclk != (PinName)NC && ssel != (PinName)NC);
+
+		for(int i=0;i<4;i++) {
+			pioChannel = gpio_channel_select(pinArray[i],PinChannelMap);
+			MBED_ASSERT(pioChannel != ERROR);
+
+		    mux = pio_periph_muxing_get(pinArray[i], PinPeripheralMap);
+			MBED_ASSERT(mux != PIO_MUX_FALSE);
+
+			status = gpio_periph_mux_set(mux,pioChannel,false);
+			MBED_ASSERT(status == SUCCESS);
+		}
 
 	if(mosi == SPI1_MOSI && miso == SPI1_MISO) {
         obj->reg_base = SPI1_BASE;
@@ -93,20 +105,8 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
         obj->reg_base = SPI2_BASE;
 	}
 
-    obj->reg_base->crc = DRIVER_BITFIELD_MASK(SPI_CR_CR_TXDMA) | DRIVER_BITFIELD_MASK(SPI_CR_CR_RXDMA) |
-                          DRIVER_BITFIELD_MASK(SPI_CR_CR_ENABLE);
 
-	for(int i=0;i<4;i++) {
-		pioChannel = gpio_channel_select(pinArray[i],PinChannelMap);
-		MBED_ASSERT(pioChannel != ERROR);
-
-	    mux = pio_periph_muxing_get(pinArray[i], PinPeripheralMap);
-		MBED_ASSERT(mux != PIO_MUX_FALSE);
-
-		status = gpio_periph_mux_set(mux,pioChannel,false);
-		MBED_ASSERT(status == SUCCESS);
-	}*/
-	obj->reg_base = SPI2_BASE;
+	//obj->reg_base = SPI2_BASE;
     obj->reg_base->crc = DRIVER_BITFIELD_MASK(SPI_CR_CR_TXDMA) | DRIVER_BITFIELD_MASK(SPI_CR_CR_RXDMA) |
                           DRIVER_BITFIELD_MASK(SPI_CR_CR_ENABLE);
 	//obj->reg_base->cr |= SPI_CR_CR_LOCLB_ENABLE_VALUE << SPI_CR_CR_LOCLB_OFFSET; // 5: Local loop back mode (shift register output connected to input in master mode)
