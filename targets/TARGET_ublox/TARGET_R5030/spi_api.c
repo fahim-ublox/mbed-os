@@ -181,6 +181,7 @@ void spi_frequency(spi_t *obj, int hz)
         MBED_ASSERT(hz >= MIN_FREQ); // Bus-clock speed in Slave mode shall not be less than 13 MHz.
     }
 
+    hz=162000; /* TODO: the low clock frequency is required for FPGA operation, will remove this line and return to 1 MHz operation on the real chip */
     clockDiv = (PCLK / (2 * hz)) - 1;
     if(clockDiv < 0xFF) {
         obj->reg_base->cdr = clockDiv; // Clock divider register: SCLK period = 2*(<ClockDiv>+1)/PCLK
