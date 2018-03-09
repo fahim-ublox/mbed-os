@@ -57,6 +57,11 @@ struct serial_s {
     irq_setting_t irq_tx_setting;		
 };
 
+struct spi_s {
+    volatile struct spi_ss *reg_base;
+    uint32_t timeout;
+};
+
 #include "gpio_object.h"
 
 #ifdef __cplusplus
