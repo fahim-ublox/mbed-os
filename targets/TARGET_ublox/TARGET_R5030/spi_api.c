@@ -25,11 +25,44 @@
 #define SPI1_BASE    app_ss_app_spi1
 #define SPI2_BASE    app_ss_app_spi2
 
-#define MAX_FREQ    260000000
-#define MIN_FREQ    130000000
-#define PerCLK   26000000 // Peripheral clock: 75Mhz
+#define MAX_FREQ    26000000UL
+#define MIN_FREQ    13000000UL
+#define PerCLK   26000000UL // Peripheral clock: 75Mhz
 #define PCLK    PerCLK // APB clock
 
+/** Macro generating the mask for a bitfield of \p n bits */
+#define DRIVER_BIT_SET(n)                      (1u<<(n))
+
+#define DRIVER_BITS_CLR(data, mask)            ((data) & ~(mask))
+#define DRIVER_BITS_SET(data, bits)            ((data) |  (bits))
+
+/** Macro generating the mask for a bitfield of \p n bits */
+#define DRIVER_BIT_MASK(n)                      (DRIVER_BIT_SET(n) - 1)
+
+/** Macro generating the mask for a bitfield defined as `name_OFFSET` and `name_SIZE` */
+#define DRIVER_BITFIELD_MASK_(name)             (DRIVER_BIT_MASK(name##_SIZE) << (name##_OFFSET))
+#define DRIVER_BITFIELD_MASK(name)              DRIVER_BITFIELD_MASK_(name)
+
+/** Extract bitfield defined as `name_OFFSET` and `name_SIZE` from \p data */
+#define DRIVER_BITFIELD_GET_(data, name)        (((data) >> name##_OFFSET) & DRIVER_BIT_MASK(name##_SIZE))
+#define DRIVER_BITFIELD_GET(data, name)         DRIVER_BITFIELD_GET_(data, name)
+
+/** Return \p data with bitfield defined as `name_OFFSET` and `name_SIZE` cleared */
+#define DRIVER_BITFIELD_CLR(data, name)         ((data) & ~DRIVER_BITFIELD_MASK(name))
+
+/** Return \p bitfield defined as `name_OFFSET` and `name_SIZE` set to \p value */
+#define DRIVER_BITFIELD_VAL_(name, value)       (((value) & DRIVER_BIT_MASK(name##_SIZE)) << name##_OFFSET)
+#define DRIVER_BITFIELD_VAL(name, value)        DRIVER_BITFIELD_VAL_(name, value)
+
+/** Return \p data with bitfield defined as `name_OFFSET` and `name_SIZE` set to \p value */
+#define DRIVER_BITFIELD_SET(data, name, value)  (DRIVER_BITFIELD_CLR(data, name) | DRIVER_BITFIELD_VAL(name, value))
+
+/** Return \p bitfield defined as `name_OFFSET` and `name_SIZE` set to \p name_ENUM_value */
+#define DRIVER_BITFIELD_ENUM_(name, enumValue)      DRIVER_BITFIELD_VAL(name, name##_ENUM_##enumValue)
+#define DRIVER_BITFIELD_ENUM(name, enumValue)       DRIVER_BITFIELD_ENUM_(name, enumValue)
+
+/** Return \p data with bitfield defined as `name_OFFSET` and `name_SIZE` set to \p name_ENUM_value */
+#define DRIVER_BITFIELD_SET_ENUM(data, name, enumValue)  DRIVER_BITFIELD_SET(data, name,  DRIVER_BITFIELD_ENUM(name, enumValue))
 
 static inline uint32_t shift(uint32_t x)
 {
@@ -48,11 +81,20 @@ static inline uint32_t bit_status(uint32_t x, uint32_t y)
 void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel)
 {
 	uint32_t status;
-    int pioChannel = 0;
+    /*int pioChannel = 0;
     PioPeriphMux mux;
 	PinName pinArray[4] = {mosi, miso, sclk, ssel};
 
     MBED_ASSERT(mosi != (PinName)NC && miso != (PinName)NC && sclk != (PinName)NC && ssel != (PinName)NC);
+
+	if(mosi == SPI1_MOSI && miso == SPI1_MISO) {
+        obj->reg_base = SPI1_BASE;
+	} else {
+        obj->reg_base = SPI2_BASE;
+	}
+
+    obj->reg_base->crc = DRIVER_BITFIELD_MASK(SPI_CR_CR_TXDMA) | DRIVER_BITFIELD_MASK(SPI_CR_CR_RXDMA) |
+                          DRIVER_BITFIELD_MASK(SPI_CR_CR_ENABLE);
 
 	for(int i=0;i<4;i++) {
 		pioChannel = gpio_channel_select(pinArray[i],PinChannelMap);
@@ -63,18 +105,13 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
 
 		status = gpio_periph_mux_set(mux,pioChannel,false);
 		MBED_ASSERT(status == SUCCESS);
-	}
-	
-	if(mosi == SPI1_MOSI && miso == SPI1_MISO) {
-        obj->reg_base = SPI1_BASE;
-	} else {
-        obj->reg_base = SPI2_BASE;
-	}
-	
-	obj->reg_base->cr |= SPI_CR_CR_ENABLE_ENABLE_VALUE << SPI_CR_CR_ENABLE_OFFSET; // 0: Enable SPI
+	}*/
+	obj->reg_base = SPI2_BASE;
+    obj->reg_base->crc = DRIVER_BITFIELD_MASK(SPI_CR_CR_TXDMA) | DRIVER_BITFIELD_MASK(SPI_CR_CR_RXDMA) |
+                          DRIVER_BITFIELD_MASK(SPI_CR_CR_ENABLE);
 	//obj->reg_base->cr |= SPI_CR_CR_LOCLB_ENABLE_VALUE << SPI_CR_CR_LOCLB_OFFSET; // 5: Local loop back mode (shift register output connected to input in master mode)
-	obj->reg_base->cr |= SPI_CR_CR_LOCKS_ENABLE_ACTIVE_ONLY_DURING_MASTER_MODE_VALUE << SPI_CR_CR_LOCKS_OFFSET; // 9: Keep CS asserted in master mode also when TxFifo is empty
-	obj->reg_base->cr |= SPI_CR_CR_CONTINUESCK_ENABLE_ACTIVE_ONLY_DURING_MASTER_MODE_VALUE << SPI_CR_CR_CONTINUESCK_OFFSET; // 10: Keep on generating SCK in master mode also when TxFifo is empty
+	//obj->reg_base->cr |= SPI_CR_CR_LOCKS_ENABLE_ACTIVE_ONLY_DURING_MASTER_MODE_VALUE << SPI_CR_CR_LOCKS_OFFSET; // 9: Keep CS asserted in master mode also when TxFifo is empty
+	//obj->reg_base->cr |= SPI_CR_CR_CONTINUESCK_ENABLE_ACTIVE_ONLY_DURING_MASTER_MODE_VALUE << SPI_CR_CR_CONTINUESCK_OFFSET; // 10: Keep on generating SCK in master mode also when TxFifo is empty
 }
 
 /*****************************************************************************
@@ -154,15 +191,16 @@ void spi_frequency(spi_t *obj, int hz)
     obj->reg_base->tor = 0xFF; // Timeout counter register: timeout = 8*(<ClockDiv>+1)*<timeout>/ PCLK 
 
     p_waitDiv = PCLK / 1000 * 6 / (clockDiv + 1) / 1000; // 6us wait
-    if(clockDiv < 0xFF) {
+    if(p_waitDiv > 0 && p_waitDiv < 0xFF) {
         obj->reg_base->wsr = p_waitDiv - 1; 
         obj->reg_base->wgr = p_waitDiv - 1; 
     } else {
         MBED_ASSERT("Invalid Wait Divider");
     }
-			
-    dataSize = bit_status(obj->reg_base->cr, SPI_CR_CR_FLOWCTRL_OFFSET) == SPI_CR_CR_MASTER_MASTER_MODE_VALUE ? 8 : 9;
-    obj->timeout = ((8 * 2 + (obj->reg_base->wgr + 1)) * dataSize + (obj->reg_base->wsr + 1)) * (obj->reg_base->cdr + 1)/(MAX_FREQ / 1000); //duration in us
+	obj->reg_base->csr = DRIVER_BITFIELD_SET(obj->reg_base->csr, SPI_CSR_NONE, 0);		
+    //dataSize = bit_status(obj->reg_base->cr, SPI_CR_CR_FLOWCTRL_OFFSET) == SPI_CR_CR_MASTER_MASTER_MODE_VALUE ? 8 : 9;
+    //obj->timeout = ((8 * 2 + (obj->reg_base->wgr + 1)) * dataSize + (obj->reg_base->wsr + 1)) * (obj->reg_base->cdr + 1)/(MAX_FREQ / 1000); //duration in us
+	obj->reg_base->cr |= SPI_CR_CR_ENABLE_ENABLE_VALUE << SPI_CR_CR_ENABLE_OFFSET; // 0: Enable SPI
 }
 
 /*****************************************************************************
@@ -171,9 +209,10 @@ void spi_frequency(spi_t *obj, int hz)
 *****************************************************************************/
 int spi_master_write(spi_t *obj, int value)
 {	
-    obj->reg_base->thr = (uint8_t)value;
+	obj->reg_base->thr = (uint8_t)value;
     while(!(bit_status(obj->reg_base->sr, SPI_SR_SR_TXEMPTY_OFFSET))); // Wait for TX buffer empty
 
+    //obj->reg_base->crc = SPI_CR_CR_ENABLE_ENABLE_VALUE << SPI_CR_CR_ENABLE_OFFSET;
     return  obj->reg_base->rhr;
 }
 

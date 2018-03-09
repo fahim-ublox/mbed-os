@@ -36,7 +36,7 @@ SPI::SPI(PinName mosi, PinName miso, PinName sclk, PinName ssel) :
 #endif
         _bits(8),
         _mode(0),
-        _hz(1000000),
+        _hz(162000),
         _write_fill(SPI_FILL_CHAR) {
     // No lock needed in the constructor
 

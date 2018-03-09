@@ -165,13 +165,13 @@ int gpio_periph_mux_set(PioPeriphMux mux, uint8_t pioChannel, bool periphPullUpD
     	  break;
 
       case PIO_MUX_PERIPH_1:
-    	  pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);     // pio disable
+    	  //pio_channel_regbase->pio_pdr_0 = (1 << channel_offset_in_reg);     // pio disable
     	  pio_channel_regbase->pio_bsr_0 |= (1 << channel_offset_in_reg);    // mux0 enable
-    	  pio_channel_regbase->pio_odr_0  = (1 << channel_offset_in_reg);    // pad config: output driver disable
-    	  pio_channel_regbase->pio_iner_0 = (1 << channel_offset_in_reg);    // pad config: receiver enable
-    	  pio_channel_regbase->pio_pldr_0 = (1 << channel_offset_in_reg);    // pad config: pulldown disabled
-    	  pio_channel_regbase->pio_phdr_0 = (1 << channel_offset_in_reg);    // pad config: pullup disabled
-    	  pio_channel_regbase->pio_per_0  = (1 << channel_offset_in_reg);    // pio enable
+    	  //pio_channel_regbase->pio_odr_0  = (1 << channel_offset_in_reg);    // pad config: output driver disable
+    	  //pio_channel_regbase->pio_iner_0 = (1 << channel_offset_in_reg);    // pad config: receiver enable
+    	  //pio_channel_regbase->pio_pldr_0 = (1 << channel_offset_in_reg);    // pad config: pulldown disabled
+    	  //pio_channel_regbase->pio_phdr_0 = (1 << channel_offset_in_reg);    // pad config: pullup disabled
+    	  //pio_channel_regbase->pio_per_0  = (1 << channel_offset_in_reg);    // pio enable
     	  break;
 
       case PIO_MUX_PERIPH_2:
