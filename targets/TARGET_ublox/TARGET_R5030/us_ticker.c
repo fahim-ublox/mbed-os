@@ -163,7 +163,7 @@ void us_ticker_init(void)
         timer_base->timer2_con = 0x0F;
         //NVIC_DisableIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
         NVIC_EnableIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
-
+		
         g_initialised = true;
     }
 }
