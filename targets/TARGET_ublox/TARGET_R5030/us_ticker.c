@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-/* The usecond ticker is mapped to TIMER0.  A few issues must be dealt
+/* The usecond ticker is mapped to TIMER1.  A few issues must be dealt
  * with in this driver:
  *
  * 1.  The us_ticker API must count upwards, not down.
  * 2.  The expected range/resolution is 32 bits each of 1 usecond,
- *     whereas TIMER0 runs at 48 MHz (not 1 MHz) and so actually
- *     has a range/resolution of 26 bits at 0.02 useconds.  Software
+ *     whereas TIMER1 runs at 26 MHz (not 1 MHz) and so actually
+ *     has a range/resolution of 26 bits at 0.038 useconds.  Software
  *     has to compensate for this.
  */
 
 #include "us_ticker_api.h"
 #include "mbed_critical.h"
+#include "cmsis.h"
 
 /* ----------------------------------------------------------------
  * MACROS
  * ----------------------------------------------------------------*/
 
-/* TIMER0 clock is 48 MHz */
-#define CLOCK_TICKS_PER_US 48
+/* TIMER1 clock is 26 MHz */
+#define CLOCK_TICKS_PER_US 26
 
 /* The number of clock ticks in a full-run of
- * TIMER0, scaled to represent useconds */
-#define USECONDS_PER_FULL_TIMER0_RUN 89478485
+ * TIMER1, scaled to represent useconds */
+#define USECONDS_PER_FULL_TIMER1_RUN 165191050
+//#define USECONDS_PER_FULL_TIMER1_RUN 4294967295
 
 /* ----------------------------------------------------------------
  * TYPES
@@ -53,7 +55,7 @@ static bool g_initialised = false;
 static uint32_t g_us_overflow = 0;
 
 /* The number of useconds to increment the by at each interrupt */
-static uint32_t g_us_overflow_increment = USECONDS_PER_FULL_TIMER0_RUN;
+static uint32_t g_us_overflow_increment = USECONDS_PER_FULL_TIMER1_RUN;
 
 /* Keep track of extra loops required to represent a particular time
  * as the HW timer runs faster than 1 MHz */
@@ -61,10 +63,12 @@ static uint32_t g_timer_extra_loops_required = 0;
 static uint32_t g_timer_extra_loops_done = 0;
 
 /* Keep track of any adjustment due to user interrupts . */
-//static uint32_t g_user_interrupt_offset = 0;
+static uint32_t g_user_interrupt_offset = 0;
 
 /* Flag that a user timer is running */
 static bool g_user_interrupt = false;
+
+volatile struct timer_s *timer_base;
 
 /* ----------------------------------------------------------------
  * FUNCTION PROTOTYPES
@@ -100,14 +104,14 @@ static inline uint32_t divide_by_48(uint32_t x)
     return (x1 << 16) + x1r + x2;
 }
 
-/* Timer0 handler */
-void IRQ1_TMR0_Handler(void)
+/* Timer1 handler */
+void APP_CPU_APP_IRQ_TIMER1_INT_IRQHandler(void)
 {
     if (g_initialised) {
         /* Increment the overflow count and set the increment
          * value for next time */
         g_us_overflow += g_us_overflow_increment;
-        g_us_overflow_increment = USECONDS_PER_FULL_TIMER0_RUN;
+        g_us_overflow_increment = USECONDS_PER_FULL_TIMER1_RUN;
 
         /* Now handle the user interrupt case */
         if (g_user_interrupt) {
@@ -133,49 +137,50 @@ void IRQ1_TMR0_Handler(void)
 
 void us_ticker_init(void)
 {
-    /*if (!g_initialised) {
-        /// Reset the globals 
+    if (!g_initialised) {
+        /* Reset the globals */
         g_timer_extra_loops_done = 0;
         g_timer_extra_loops_required = 0;
         g_us_overflow = 0;
-        g_us_overflow_increment = USECONDS_PER_FULL_TIMER0_RUN;
+        g_us_overflow_increment = USECONDS_PER_FULL_TIMER1_RUN;
         g_user_interrupt_offset = 0;
         g_user_interrupt = false;
 
-        // Get the timer running (starting at what is zero,
-        // once inverted), with repeat 
+        /* Get the timer running (starting at what is zero,
+         * once inverted), with repeat */
         NVIC_ClearPendingIRQ(APP_CPU_APP_IRQ_TIMER1_INT_IRQn);
-        TIMER0_LOAD = 0xFFFFFFFF;
-        TIMER0_CTRL = 0x03;
+        timer_base = app_ss_app_timer;
+        timer_base->timer1_load = 0xFFFFFFFF;
+        timer_base->timer1_con = 0x0F;
+        //NVIC_DisableIRQ(APP_CPU_APP_IRQ_TIMER1_INT_IRQn);
         NVIC_EnableIRQ(APP_CPU_APP_IRQ_TIMER1_INT_IRQn);
 
         g_initialised = true;
-    }*/
+    }
 }
 
 uint32_t us_ticker_read()
 {
-    /*uint32_t timeValue;
+    uint32_t timeValue;
 
-     This can be called before initialisation has been performed 
+    /* This can be called before initialisation has been performed */
     if (!g_initialised) {
         us_ticker_init();
     }
 
-     Disable interrupts to avoid collisions 
+    /* Disable interrupts to avoid collisions */
     core_util_critical_section_enter();
 
-     Get the timer value, adding the offset in case we've been moved
+    /* Get the timer value, adding the offset in case we've been moved
      * around by user activity, inverting it (as a count-up timer is
      * expected), then scaling it to useconds and finally adding the
-     * usecond overflow value to make up the 32-bit usecond total 
-    timeValue = divide_by_48(~(TIMER0_TIME + g_user_interrupt_offset)) + g_us_overflow;
+     * usecond overflow value to make up the 32-bit usecond total */
+    timeValue = divide_by_48(~(timer_base->timer1_value + g_user_interrupt_offset)) + g_us_overflow;
 
-     Put interrupts back 
+    /* Put interrupts back */
     core_util_critical_section_exit();
 
-    return timeValue;*/
-	return 0;
+    return timeValue;
 }
 
 /* NOTE: it seems to be an accepted fact that users
@@ -184,47 +189,47 @@ uint32_t us_ticker_read()
  */
 void us_ticker_set_interrupt(timestamp_t timestamp)
 {
-    // g_timer_extra_loops_required = 0;
-    // g_timer_extra_loops_done = 0;
-    // int32_t timeDelta;
+    g_timer_extra_loops_required = 0;
+    g_timer_extra_loops_done = 0;
+    int32_t timeDelta;
 
-    // /* Disable interrupts to avoid collisions */
-    // core_util_critical_section_enter();
+    /* Disable interrupts to avoid collisions */
+    core_util_critical_section_enter();
 
-    // /* Establish how far we're being asked to move */
-    // timeDelta = (int32_t) ((uint32_t) timestamp - us_ticker_read());
+    /* Establish how far we're being asked to move */
+    timeDelta = (int32_t) ((uint32_t) timestamp - us_ticker_read());
 
-    // if (timeDelta <= 0) {
-        // /* Make delta positive if it's not, it will expire pretty quickly */
-        // /* Note: can't just call us_ticker_irq_handler() directly as we
-         // * may already be in it and will overflow the stack */
-        // timeDelta = 1;
-    // }
+    if (timeDelta <= 0) {
+        /* Make delta positive if it's not, it will expire pretty quickly */
+        /* Note: can't just call us_ticker_irq_handler() directly as we
+         * may already be in it and will overflow the stack */
+        timeDelta = 1;
+    }
 
-    // /* The TIMER0 clock source is greater than 1 MHz, so
-     // * work out how many times we have to go around
-     // * and what the remainder is */
-    // g_timer_extra_loops_required = (uint32_t) timeDelta / USECONDS_PER_FULL_TIMER0_RUN;
-    // timeDelta -= g_timer_extra_loops_required * USECONDS_PER_FULL_TIMER0_RUN;
+    /* The TIMER1 clock source is greater than 1 MHz, so
+     * work out how many times we have to go around
+     * and what the remainder is */
+    g_timer_extra_loops_required = (uint32_t) timeDelta / USECONDS_PER_FULL_TIMER1_RUN;
+    timeDelta -= g_timer_extra_loops_required * USECONDS_PER_FULL_TIMER1_RUN;
 
-    // /* Next time we hit the interrupt the increment will be smaller */
-    // g_us_overflow_increment = (uint32_t) timeDelta;
+    /* Next time we hit the interrupt the increment will be smaller */
+    g_us_overflow_increment = (uint32_t) timeDelta;
 
-    // /* We're about to modify the timer value; work out the
-     // * difference so that we can compensate for it when
-     // * the time is read */
-    // timeDelta = timeDelta * CLOCK_TICKS_PER_US;
-    // g_user_interrupt_offset += TIMER0_TIME - timeDelta;
+    /* We're about to modify the timer value; work out the
+     * difference so that we can compensate for it when
+     * the time is read */
+    timeDelta = timeDelta * CLOCK_TICKS_PER_US;
+    g_user_interrupt_offset += timer_base->timer1_value - timeDelta;
 
-    // /* Run for the remainder first, then we can loop for the full
-     // * USECONDS_PER_FULL_TIMER0_RUN afterwards */
-    // TIMER0_LOAD = timeDelta;
+    /* Run for the remainder first, then we can loop for the full
+     * USECONDS_PER_FULL_TIMER1_RUN afterwards */
+    timer_base->timer1_load = timeDelta;
 
-    // /* A user interrupt is now running */
-    // g_user_interrupt = true;
+    /* A user interrupt is now running */
+    g_user_interrupt = true;
 
-    // /* Put interrupts back */
-    // core_util_critical_section_exit();
+    /* Put interrupts back */
+    core_util_critical_section_exit();
 }
 
 void us_ticker_fire_interrupt(void)
@@ -252,4 +257,3 @@ void us_ticker_clear_interrupt(void)
     g_timer_extra_loops_required = 0;
     g_us_overflow_increment = 0;
 }
-
