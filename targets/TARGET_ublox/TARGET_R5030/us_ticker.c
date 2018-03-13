@@ -94,7 +94,7 @@ static inline uint32_t divide_by_48(uint32_t x);
  *
  * The cost is 29 instructions.
  */
-static inline uint32_t divide_by_48(uint32_t x)
+/*static inline uint32_t divide_by_48(uint32_t x)
 {
     uint32_t x1 = ((x >> 16) * 1365) >> 16;
     uint32_t x1r = ((x & 0xFFFF0000) - ((x1 * 48) << 16));
@@ -102,10 +102,19 @@ static inline uint32_t divide_by_48(uint32_t x)
     uint32_t x2 = ((x & 0xFFFF) * 1365) >> 16;
 
     return (x1 << 16) + x1r + x2;
+}*/
+static inline uint32_t divide_by_48(uint32_t x)
+{
+    uint32_t x1 = ((x >> 16) * 2521) >> 16;
+    uint32_t x1r = ((x & 0xFFFF0000) - ((x1 * 26) << 16));
+             x1r = (x1r  * 2521) >> 16;
+    uint32_t x2 = ((x & 0xFFFF) * 2521) >> 16;
+
+    return (x1 << 16) + x1r + x2;
 }
 
 /* Timer1 handler */
-void APP_CPU_APP_IRQ_TIMER1_INT_IRQHandler(void)
+void APP_CPU_APP_IRQ_TIMER2_INT_IRQHandler(void)
 {
     if (g_initialised) {
         /* Increment the overflow count and set the increment
@@ -128,7 +137,7 @@ void APP_CPU_APP_IRQ_TIMER1_INT_IRQHandler(void)
         }
     }
 
-    NVIC_ClearPendingIRQ(APP_CPU_APP_IRQ_TIMER1_INT_IRQn);
+    NVIC_ClearPendingIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
 }
 
 /* ----------------------------------------------------------------
@@ -148,12 +157,12 @@ void us_ticker_init(void)
 
         /* Get the timer running (starting at what is zero,
          * once inverted), with repeat */
-        NVIC_ClearPendingIRQ(APP_CPU_APP_IRQ_TIMER1_INT_IRQn);
+        NVIC_ClearPendingIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
         timer_base = app_ss_app_timer;
-        timer_base->timer1_load = 0xFFFFFFFF;
-        timer_base->timer1_con = 0x0F;
-        //NVIC_DisableIRQ(APP_CPU_APP_IRQ_TIMER1_INT_IRQn);
-        NVIC_EnableIRQ(APP_CPU_APP_IRQ_TIMER1_INT_IRQn);
+        timer_base->timer2_load = 0xFFFFFFFF;
+        timer_base->timer2_con = 0x0F;
+        //NVIC_DisableIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
+        NVIC_EnableIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
 
         g_initialised = true;
     }
@@ -175,7 +184,7 @@ uint32_t us_ticker_read()
      * around by user activity, inverting it (as a count-up timer is
      * expected), then scaling it to useconds and finally adding the
      * usecond overflow value to make up the 32-bit usecond total */
-    timeValue = divide_by_48(~(timer_base->timer1_value + g_user_interrupt_offset)) + g_us_overflow;
+    timeValue = divide_by_48(~(timer_base->timer2_value + g_user_interrupt_offset)) + g_us_overflow;
 
     /* Put interrupts back */
     core_util_critical_section_exit();
@@ -219,11 +228,11 @@ void us_ticker_set_interrupt(timestamp_t timestamp)
      * difference so that we can compensate for it when
      * the time is read */
     timeDelta = timeDelta * CLOCK_TICKS_PER_US;
-    g_user_interrupt_offset += timer_base->timer1_value - timeDelta;
+    g_user_interrupt_offset += timer_base->timer2_value - timeDelta;
 
     /* Run for the remainder first, then we can loop for the full
      * USECONDS_PER_FULL_TIMER1_RUN afterwards */
-    timer_base->timer1_load = timeDelta;
+    timer_base->timer2_load = timeDelta;
 
     /* A user interrupt is now running */
     g_user_interrupt = true;
@@ -235,7 +244,7 @@ void us_ticker_set_interrupt(timestamp_t timestamp)
 void us_ticker_fire_interrupt(void)
 {
     g_user_interrupt = true;
-    NVIC_SetPendingIRQ(APP_CPU_APP_IRQ_TIMER1_INT_IRQn);
+    NVIC_SetPendingIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
 }
 
 void us_ticker_disable_interrupt(void)
