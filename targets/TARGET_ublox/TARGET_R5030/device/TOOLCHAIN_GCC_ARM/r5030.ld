@@ -2,7 +2,8 @@
 MEMORY
 { 
   FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 64K
-  RAM (rwx)  : ORIGIN = 0x20000000 + 0xF8, LENGTH = 64K - 0xF8
+  RAM (rwx)  : ORIGIN = 0x20000000 + 0xF8, LENGTH = 64K - 0xF8 
+  PSRAM (rwx): ORIGIN = 0x60000000, LENGTH = 128K
 }
 
 /* Linker script to place sections and symbol values. Should be used together
@@ -132,7 +133,7 @@ SECTIONS
         __HeapBase = .;
         *(.heap*)
         __HeapLimit = .;
-    } > RAM
+    } > PSRAM
 
     /* .stack_dummy section doesn't contains any symbols. It is only
      * used for linker to calculate size of stack sections, and assign
@@ -140,8 +141,8 @@ SECTIONS
     .stack_dummy (COPY):
     {
         *(.stack*)
-    } > RAM
-
+    } > PSRAM
+    
     /* Set stack top to end of RAM, and stack limit move down by
      * size of stack_dummy section */
     __StackTop = ORIGIN(RAM) + LENGTH(RAM);
@@ -150,5 +151,5 @@ SECTIONS
     PROVIDE(__stack = __StackTop);
 
     /* Check if data + heap + stack exceeds RAM limit */
-    ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
+    /*ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")*/
 }
