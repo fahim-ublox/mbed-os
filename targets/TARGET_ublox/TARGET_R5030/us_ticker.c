@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-/* The usecond ticker is mapped to TIMER1.  A few issues must be dealt
+/* The usecond ticker is mapped to TIMER2.  A few issues must be dealt
  * with in this driver:
  *
  * 1.  The us_ticker API must count upwards, not down.
- * 2.  The expected range/resolution is 32 bits each of 1 usecond,
- *     whereas TIMER1 runs at 26 MHz (not 1 MHz) and so actually
- *     has a range/resolution of 26 bits at 0.038 useconds.  Software
- *     has to compensate for this.
+ * 2.  The expected range/resolution is 16 bits each of 1 usecond,
+ *     whereas TIMER2 runs at 26 MHz (not 1 MHz) and so actually
+ *     has a range/resolution of 32 bits at 0.038 useconds.  Software
+ *     has to compensate for this. We configured our timer for 16 bit
+ *     and it's count down.
  */
 
 #include "us_ticker_api.h"
@@ -32,14 +33,20 @@
  * MACROS
  * ----------------------------------------------------------------*/
 
-/* TIMER1 clock is 26 MHz */
+/* TIMER2 clock is 26 MHz */
 #define CLOCK_TICKS_PER_US 26
 
-/* The number of clock ticks in a full-run of
- * TIMER1, scaled to represent useconds */
-#define USECONDS_PER_FULL_TIMER1_RUN 165191050
-//#define USECONDS_PER_FULL_TIMER1_RUN 4294967295
+/* Configured Size of TIMER2 as 32/16 bits  */
+#define	CONFIG_SIZE_OF_TIMER 16
 
+/* The number of clock ticks in a full-run of
+ * TIMER2 in 16-bit mode, scaled to represent
+ * useconds */
+#define USECONDS_PER_FULL_TIMER2_RUN 2520
+
+/* Update number of counts down timer gone through */
+#define READ_TMR_CNTS_ELAPSED()		\
+		((timer_base->timer2_load) - (timer_base->timer2_value)) + g_us_overflow;
 /* ----------------------------------------------------------------
  * TYPES
  * ----------------------------------------------------------------*/
@@ -51,11 +58,11 @@
 /* Are we ready? */
 static bool g_initialised = false;
 
-/* Keep track of the number of useconds elapsed. */
+/* Keep track of the number of counts elapsed. */
 static uint32_t g_us_overflow = 0;
 
 /* The number of useconds to increment the by at each interrupt */
-static uint32_t g_us_overflow_increment = USECONDS_PER_FULL_TIMER1_RUN;
+static uint32_t g_us_overflow_increment = USECONDS_PER_FULL_TIMER2_RUN;
 
 /* Keep track of extra loops required to represent a particular time
  * as the HW timer runs faster than 1 MHz */
@@ -67,43 +74,33 @@ static uint32_t g_user_interrupt_offset = 0;
 
 /* Flag that a user timer is running */
 static bool g_user_interrupt = false;
-
 volatile struct timer_s *timer_base;
 
 /* ----------------------------------------------------------------
  * FUNCTION PROTOTYPES
  * ----------------------------------------------------------------*/
 
-static inline uint32_t divide_by_48(uint32_t x);
+static inline uint32_t divide_by_26(uint32_t x);
 
 /* ----------------------------------------------------------------
  * NON-API FUNCTIONS
  * ----------------------------------------------------------------*/
 
-/* Perform a divide-by-48 operation.
+/* Perform a divide-by-26 operation.
  * This is done as a multiply-shift operation to take advantage of
  * the ARM 32 bit single-cycle multiply and avoid using division;
- * 1/48 is equivalent to 1365/2^16.  It is also done in two halves
+ * 1/26 is equivalent to 2521/2^16.  It is also done in two halves
  * to make sure that the multiplies fit into 32 bits.
  *
  * The principle is:
- *  - divide the top 16 bits by 48 using multiply-shift (=> x1),
- *  - work out the remainder of that operation and divide that by 48 (=> x1r),
- *  - divide the bottom 16 bits by 48 using multiply-shift (=> x2),
+ *  - divide the top 16 bits by 26 using multiply-shift (=> x1),
+ *  - work out the remainder of that operation and divide that by 26 (=> x1r),
+ *  - divide the bottom 16 bits by 26 using multiply-shift (=> x2),
  *  - add the lot together to get the result.
  *
  * The cost is 29 instructions.
  */
-/*static inline uint32_t divide_by_48(uint32_t x)
-{
-    uint32_t x1 = ((x >> 16) * 1365) >> 16;
-    uint32_t x1r = ((x & 0xFFFF0000) - ((x1 * 48) << 16));
-             x1r = (x1r  * 1365) >> 16;
-    uint32_t x2 = ((x & 0xFFFF) * 1365) >> 16;
-
-    return (x1 << 16) + x1r + x2;
-}*/
-static inline uint32_t divide_by_48(uint32_t x)
+static inline uint32_t divide_by_26(uint32_t x)
 {
     uint32_t x1 = ((x >> 16) * 2521) >> 16;
     uint32_t x1r = ((x & 0xFFFF0000) - ((x1 * 26) << 16));
@@ -113,14 +110,14 @@ static inline uint32_t divide_by_48(uint32_t x)
     return (x1 << 16) + x1r + x2;
 }
 
-/* Timer1 handler */
+/* TIMER2 handler */
 void APP_CPU_APP_IRQ_TIMER2_INT_IRQHandler(void)
 {
     if (g_initialised) {
         /* Increment the overflow count and set the increment
          * value for next time */
         g_us_overflow += g_us_overflow_increment;
-        g_us_overflow_increment = USECONDS_PER_FULL_TIMER1_RUN;
+        g_us_overflow_increment = USECONDS_PER_FULL_TIMER2_RUN;
 
         /* Now handle the user interrupt case */
         if (g_user_interrupt) {
@@ -137,6 +134,10 @@ void APP_CPU_APP_IRQ_TIMER2_INT_IRQHandler(void)
         }
     }
 
+    /* Clear overflow bit of timer which clears TIMER2 Interrupt Flag */
+    timer_base->timer2_stat = 0x00000001;
+
+    /* Clear TIMER2 Interrupt Pending Flag */
     NVIC_ClearPendingIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
 }
 
@@ -151,7 +152,7 @@ void us_ticker_init(void)
         g_timer_extra_loops_done = 0;
         g_timer_extra_loops_required = 0;
         g_us_overflow = 0;
-        g_us_overflow_increment = USECONDS_PER_FULL_TIMER1_RUN;
+        g_us_overflow_increment = USECONDS_PER_FULL_TIMER2_RUN;
         g_user_interrupt_offset = 0;
         g_user_interrupt = false;
 
@@ -159,11 +160,12 @@ void us_ticker_init(void)
          * once inverted), with repeat */
         NVIC_ClearPendingIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
         timer_base = app_ss_app_timer;
-        timer_base->timer2_load = 0xFFFFFFFF;
-        timer_base->timer2_con = 0x0F;
-        //NVIC_DisableIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
+        timer_base->timer2_load = 0xFFFFUL;
         NVIC_EnableIRQ(APP_CPU_APP_IRQ_TIMER2_INT_IRQn);
 
+        /* Timer set for 16-bit, Irq enable, Free running timer,
+         * no pre-scalar and timer is ON*/
+        timer_base->timer2_con = 0x03;
         g_initialised = true;
     }
 }
@@ -172,7 +174,7 @@ uint32_t us_ticker_read()
 {
     uint32_t timeValue;
 
-    /* This can be called before initialisation has been performed */
+    /* This can be called before initialization has been performed */
     if (!g_initialised) {
         us_ticker_init();
     }
@@ -180,13 +182,20 @@ uint32_t us_ticker_read()
     /* Disable interrupts to avoid collisions */
     core_util_critical_section_enter();
 
-    /* Get the timer value, adding the offset in case we've been moved
-     * around by user activity, inverting it (as a count-up timer is
-     * expected), then scaling it to useconds and finally adding the
-     * usecond overflow value to make up the 32-bit usecond total */
-    timeValue = divide_by_48(~(timer_base->timer2_value + g_user_interrupt_offset)) + g_us_overflow;
+    /* If TIMER2 is overflowed (value > load register) value so it means
+     * it get overflowed and if not we just take counts elapsed from starting
+     * value as it coun-down timer simple value would not give us counts */
+	if(timer_base->timer2_load < timer_base->timer2_value)
+	{
+		/* Overflow condition */
+		timeValue = timer_base->timer2_load + READ_TMR_CNTS_ELAPSED();
+	}
+	else
+	{
+    	timeValue = READ_TMR_CNTS_ELAPSED();
+	}
 
-    /* Put interrupts back */
+    	/* Put interrupts back */
     core_util_critical_section_exit();
 
     return timeValue;
@@ -205,8 +214,8 @@ void us_ticker_set_interrupt(timestamp_t timestamp)
     /* Disable interrupts to avoid collisions */
     core_util_critical_section_enter();
 
-    /* Establish how far we're being asked to move */
-    timeDelta = (int32_t) ((uint32_t) timestamp - us_ticker_read());
+    /* Establish how far we're being asked to move in counts */
+    timeDelta = divide_by_26(((uint32_t) timestamp - us_ticker_read()));
 
     if (timeDelta <= 0) {
         /* Make delta positive if it's not, it will expire pretty quickly */
@@ -215,23 +224,25 @@ void us_ticker_set_interrupt(timestamp_t timestamp)
         timeDelta = 1;
     }
 
-    /* The TIMER1 clock source is greater than 1 MHz, so
+    /* The TIMER2 clock source is greater than 1 MHz, so
      * work out how many times we have to go around
      * and what the remainder is */
-    g_timer_extra_loops_required = (uint32_t) timeDelta / USECONDS_PER_FULL_TIMER1_RUN;
-    timeDelta -= g_timer_extra_loops_required * USECONDS_PER_FULL_TIMER1_RUN;
-
-    /* Next time we hit the interrupt the increment will be smaller */
-    g_us_overflow_increment = (uint32_t) timeDelta;
+    g_timer_extra_loops_required = (uint32_t) timeDelta / USECONDS_PER_FULL_TIMER2_RUN;
+    timeDelta -= g_timer_extra_loops_required * USECONDS_PER_FULL_TIMER2_RUN;
 
     /* We're about to modify the timer value; work out the
      * difference so that we can compensate for it when
      * the time is read */
-    timeDelta = timeDelta * CLOCK_TICKS_PER_US;
-    g_user_interrupt_offset += timer_base->timer2_value - timeDelta;
+    timeDelta = timeDelta  * CLOCK_TICKS_PER_US ;
+
+    /* Next time we hit the interrupt the increment will be smaller */
+    g_us_overflow_increment = (uint32_t) timeDelta;
+
+    //g_user_interrupt_offset += timer_base->timer2_value - timeDelta;
+    g_user_interrupt_offset += timeDelta;
 
     /* Run for the remainder first, then we can loop for the full
-     * USECONDS_PER_FULL_TIMER1_RUN afterwards */
+     * USECONDS_PER_FULL_TIMER2_RUN afterwards */
     timer_base->timer2_load = timeDelta;
 
     /* A user interrupt is now running */
@@ -264,5 +275,17 @@ void us_ticker_clear_interrupt(void)
      * clear the variables */
     g_user_interrupt = false;
     g_timer_extra_loops_required = 0;
-    g_us_overflow_increment = 0;
+    g_us_overflow = 0;
+}
+
+/* us_ticker_get_info is week function in mbed it
+ * needs to be overloaded specific to hardware timer,
+ * this need to be updated in sync with hardware TIMER2 */
+const ticker_info_t* us_ticker_get_info()
+{
+    static const ticker_info_t info = {
+		CLOCK_TICKS_PER_US*1000000,		// Frequency
+		CONFIG_SIZE_OF_TIMER			// TIMER2 size
+    };
+    return &info;
 }
