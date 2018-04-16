@@ -51,49 +51,85 @@ extern "C" {
 
 
 typedef struct {
-	PinName  pin;
-	uint32_t mask;
-	__IO struct pio_s *reg_base;
+    PinName  pin;
+    uint32_t mask;
+    __IO struct pio_s *reg_base;
 } gpio_t;
 
 typedef struct {
-	PinName  pin;
-	__IO int channel;
+    PinName  pin;
+    __IO int channel;
 } PinToChannel;
 
+typedef struct {
+    PinName  pin;
+    __IO int peripheral;
+} PinToPeripheral;
+
+
 typedef enum {
-	PIO_MUX_FALSE,
-	PIO_MUX_GPIO,
-	PIO_MUX_PERIPH_0,
-	PIO_MUX_PERIPH_1,
-	PIO_MUX_PERIPH_2,
-	PIO_MUX_PERIPH_3,
-	PIO_MUX_LAST
+    PIO_MUX_FALSE,
+    PIO_MUX_GPIO,
+    PIO_MUX_PERIPH_0,
+    PIO_MUX_PERIPH_1,
+    PIO_MUX_PERIPH_2,
+    PIO_MUX_PERIPH_3,
+    PIO_MUX_LAST
 } PioPeriphMux;
 
 static const PinToChannel PinChannelMap[] = {
     {LED0, 0},
-    {LED1, 1},
+    /*{LED1, 1},  // Commented for SPI testing
     {LED2, 2},
     {LED3, 3},
     {LED4, 4},
     {LED5, 5},
-    {LED6, 6},
+    {LED6, 6},*/
     {UART1_RX, 42},
     {UART1_TX, 43},
     {UART1_CTS, 44},
     {UART1_RTS, 45},
-    {UART2_RX, 25},
-    {UART2_TX, 26},
+    {UART2_RX, 30},
+    {UART2_TX, 31},
     {I2C_SCL, 50},
     {I2C_SDA, 51},
-    {SPI_CS, 49},
-    {SPI_CLK, 48},
-    {SPI_MOSI, 46},
-    {SPI_MISO, 47},
+    {SPI1_MOSI, 3},
+    {SPI1_MISO, 4},
+    {SPI1_CLK, 5},
+    {SPI1_CS, 6},
+    {SPI2_MOSI, 46},
+    {SPI2_MISO, 47},
+    {SPI2_CLK, 48},
+    {SPI2_CS, 49},
     {NC, NC}
 };
 
+static const PinToPeripheral PinPeripheralMap[] = {
+    {LED0, PIO_MUX_GPIO},
+    /*{LED1, PIO_MUX_GPIO},  // Commented for SPI testing
+    {LED2, PIO_MUX_GPIO},
+    {LED3, PIO_MUX_GPIO},
+    {LED4, PIO_MUX_GPIO},
+    {LED5, PIO_MUX_GPIO},
+    {LED6, PIO_MUX_GPIO},*/
+    {UART1_RX, PIO_MUX_PERIPH_0},
+    {UART1_TX, PIO_MUX_PERIPH_0},
+    {UART1_CTS, PIO_MUX_PERIPH_0},
+    {UART1_RTS, PIO_MUX_PERIPH_0},
+    {UART2_RX, PIO_MUX_PERIPH_2},
+    {UART2_TX, PIO_MUX_PERIPH_2},
+    {I2C_SCL, PIO_MUX_PERIPH_0},
+    {I2C_SDA, PIO_MUX_PERIPH_0},
+    {SPI1_MOSI, PIO_MUX_PERIPH_1},
+    {SPI1_MISO, PIO_MUX_PERIPH_1},
+    {SPI1_CLK, PIO_MUX_PERIPH_1},
+    {SPI1_CS, PIO_MUX_PERIPH_1},
+    {SPI2_MOSI, PIO_MUX_PERIPH_1},
+    {SPI2_MISO, PIO_MUX_PERIPH_1},
+    {SPI2_CLK, PIO_MUX_PERIPH_1},
+    {SPI2_CS, PIO_MUX_PERIPH_1},
+    {NC, PIO_MUX_FALSE}
+};
 
 /*****************************************************************************
                                 gpio_write:
@@ -101,17 +137,13 @@ static const PinToChannel PinChannelMap[] = {
 *****************************************************************************/
 static inline void gpio_write(gpio_t *obj, int value)
 {
-	MBED_ASSERT(obj->pin != (PinName)NC);
+    MBED_ASSERT(obj->pin != (PinName)NC);
 
-	if (value)
-	{
-		obj->reg_base->pio_sodr_0 = obj->mask;  // Set output pin
-	}
-
-	else
-	{
-		obj->reg_base->pio_codr_0 = obj->mask; // Clear output pin
-	}
+    if (value) {
+    	obj->reg_base->pio_sodr_0 = obj->mask;  // Set output pin
+    } else {
+    	obj->reg_base->pio_codr_0 = obj->mask; // Clear output pin
+    }
 }
 
 /*****************************************************************************
@@ -120,20 +152,21 @@ static inline void gpio_write(gpio_t *obj, int value)
 *****************************************************************************/
 static inline int gpio_read(gpio_t *obj)
 {
-	MBED_ASSERT(obj->pin != (PinName)NC);
-
-	return ((obj->reg_base->pio_pdsr_0 & obj->mask) ? 1 : 0);
+    MBED_ASSERT(obj->pin != (PinName)NC);
+    return ((obj->reg_base->pio_pdsr_0 & obj->mask) ? 1 : 0);
 }
 
-
+/*****************************************************************************
+                              gpio_is_connected:
+                      Checks if gpio object is connected
+*****************************************************************************/
 static inline int gpio_is_connected(const gpio_t *obj)
 {
-	return obj->pin != (PinName)NC;
+    return obj->pin != (PinName)NC;
 }
 
-
-PioPeriphMux pio_periph_muxing_get(uint8_t pioChannel);
 int gpio_channel_select(PinName pin, const PinToChannel* map);
+PioPeriphMux pio_periph_muxing_get(PinName pin, const PinToPeripheral* map);
 int gpio_periph_mux_set(PioPeriphMux mux, uint8_t pioChannel, bool periphPullUpDownOn);
 
 #ifdef __cplusplus
