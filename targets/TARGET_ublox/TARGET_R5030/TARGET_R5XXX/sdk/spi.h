@@ -16,7 +16,7 @@
 
 /** SPI Control Registers
 */
-struct spi_s {
+struct spi_ss {
    /** SPI Control register Enable at address offset 0x000, read-write */
    uint32_t crs;
    /** SPI Control register Disable at address offset 0x004, read-write */
