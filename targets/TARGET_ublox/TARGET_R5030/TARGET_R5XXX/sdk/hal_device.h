@@ -1751,7 +1751,7 @@ namespace device {
  *I2C Interface Instance 3 - AC Control->
  *Here comes the decription of this IP component
 */
-static volatile struct i2c_s* const app_ss_i2c3 = (struct i2c_s*)(+0x49009000);
+static volatile struct i2c_ss* const app_ss_i2c3 = (struct i2c_ss*)(+0x49009000);
 #ifdef __cplusplus
 }
 #endif
@@ -1890,7 +1890,7 @@ namespace device {
  *I2C Interface Instance 1->
  *Here comes the decription of this IP component
 */
-static volatile struct i2c_s* const app_ss_i2c1 = (struct i2c_s*)(+0x49105000);
+static volatile struct i2c_ss* const app_ss_i2c1 = (struct i2c_ss*)(+0x49105000);
 #ifdef __cplusplus
 }
 #endif
@@ -1902,7 +1902,7 @@ namespace device {
  *I2C Interface Instance 2->
  *Here comes the decription of this IP component
 */
-static volatile struct i2c_s* const app_ss_i2c2 = (struct i2c_s*)(+0x49106000);
+static volatile struct i2c_ss* const app_ss_i2c2 = (struct i2c_ss*)(+0x49106000);
 #ifdef __cplusplus
 }
 #endif
