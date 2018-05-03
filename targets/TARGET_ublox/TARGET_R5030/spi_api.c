@@ -53,9 +53,9 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
     PioPeriphMux mux;
     PinName pinArray[4] = {mosi, miso, sclk, ssel};
 
-    MBED_ASSERT(mosi != (PinName)NC && miso != (PinName)NC && sclk != (PinName)NC && ssel != (PinName)NC);
+    MBED_ASSERT(mosi != (PinName)NC && miso != (PinName)NC && sclk != (PinName)NC /*&& ssel != (PinName)NC*/);
 
-    for (int i=0; i<4; i++) {
+    for (int i=0; i<3; i++) {
     	pioChannel = gpio_channel_select(pinArray[i],PinChannelMap);
     	MBED_ASSERT(pioChannel != ERROR);
 
