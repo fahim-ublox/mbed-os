@@ -25,15 +25,13 @@
 #define SPI1_BASE    app_ss_app_spi1
 #define SPI2_BASE    app_ss_app_spi2
 
-#define MAX_FREQ    26000000UL
-#define MIN_FREQ    13000000UL
 #define PerCLK   26000000UL // Peripheral clock
 #define PCLK    PerCLK // APB clock
 
 
 static inline uint32_t shift(uint32_t x)
 {
-	return (0x1u << x);
+    return (0x1u << x);
 }
 
 static inline uint32_t bit_status(uint32_t x, uint32_t y)
@@ -134,16 +132,16 @@ void spi_frequency(spi_t *obj, int hz)
     uint8_t clockDiv = 0, p_waitDiv = 0;
 	
     if (bit_status(obj->reg_base->cr, SPI_CR_CR_MASTER_OFFSET)) {
-        MBED_ASSERT(hz <= MAX_FREQ); // The maximum bus clock speed in Master mode shall be 26 MHz
+        MBED_ASSERT(hz <= PerCLK/2); // The maximum bus clock speed in Master mode shall be SCK <= PerCLKxCI/2
     } else {
-        MBED_ASSERT(hz >= MIN_FREQ); // Bus-clock speed in Slave mode shall not be less than 13 MHz.
+        MBED_ASSERT(hz <= PerCLK/6); // The maximum bus clock speed in Slave mode shall be SCK <= PerCLKxCI/6
     }
 
     clockDiv = (PCLK / (2 * hz)) - 1;
     if (clockDiv < 0xFF) {
         obj->reg_base->cdr = clockDiv; // Clock divider register: SCLK period = 2*(<ClockDiv>+1)/PCLK
     } else {
-        MBED_ASSERT("Invalid Clock Divider");
+        MBED_ASSERT(clockDiv < 0xFF); // Invalid Clock Divider
     }
 
     obj->reg_base->tor = 0xFF; // Timeout counter register: timeout = 8*(<ClockDiv>+1)*<timeout>/ PCLK 
@@ -153,10 +151,10 @@ void spi_frequency(spi_t *obj, int hz)
         obj->reg_base->wsr = p_waitDiv - 1; 
         obj->reg_base->wgr = p_waitDiv - 1; 
     } else {
-        MBED_ASSERT("Invalid Wait Divider");
+        MBED_ASSERT(p_waitDiv > 0 && p_waitDiv < 0xFF); // Invalid Wait Divider
     }
 
-	obj->reg_base->cr |= SPI_CR_CR_ENABLE_ENABLE_VALUE << SPI_CR_CR_ENABLE_OFFSET; // 0: Enable SPI
+    obj->reg_base->cr |= SPI_CR_CR_ENABLE_ENABLE_VALUE << SPI_CR_CR_ENABLE_OFFSET; // 0: Enable SPI
 }
 
 /*****************************************************************************
@@ -165,7 +163,7 @@ void spi_frequency(spi_t *obj, int hz)
 *****************************************************************************/
 int spi_master_write(spi_t *obj, int value)
 {	
-	obj->reg_base->thr = (uint8_t)value;
+    obj->reg_base->thr = (uint8_t)value;
     while (!(bit_status(obj->reg_base->sr, SPI_SR_SR_TXEMPTY_OFFSET))); // Wait for TX buffer empty
 
     return  obj->reg_base->rhr;

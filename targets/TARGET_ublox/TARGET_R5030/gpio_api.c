@@ -89,17 +89,10 @@ void gpio_dir(gpio_t *obj, PinDirection direction)
 {
     MBED_ASSERT(obj->pin != (PinName)NC);
 
-    switch (direction) {
-      case PIN_INPUT:
-    	  obj->reg_base->pio_iner_0 = obj->mask; // Enable input
-    	  break;
-      case PIN_OUTPUT:
-    	  obj->reg_base->pio_oer_0 = obj->mask; // Enable output
-    	  break;
-      default:
-    	  MBED_ASSERT("Invalid direction");
-    	  MBED_ASSERT(0);
-    	  break;
+    if (direction == PIN_INPUT) {
+  	  obj->reg_base->pio_iner_0 = obj->mask; // Enable input
+    } else {
+  	  obj->reg_base->pio_oer_0 = obj->mask; // Enable output
     }
 }
 
