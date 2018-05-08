@@ -50,11 +50,6 @@ typedef enum {
     p18 = 18,
     p19 = 19,
     
-    UART1_RX = p13,
-    UART1_TX = p18,
-    UART1_CTS = p12,
-    UART1_RTS = p11,
-
     I2C1_SCL = p0,
     I2C1_SDA = p1,
 
@@ -67,14 +62,6 @@ typedef enum {
     I2C3_SCL = p18,
     I2C3_SDA = p19,
 
-    SPI_CS = p2,
-    SPI_CLK = p3,
-    SPI_MOSI = p4,
-    SPI_MISO = p5,
-
-    UART2_RX = p7,
-    UART2_TX = p6,
-
     LED0 = p0,
     LED1 = p1,
     LED2 = p2,
@@ -82,7 +69,28 @@ typedef enum {
     LED4 = p4,
     LED5 = p5,
     LED6 = p6,
-    
+
+    I2C_SCL = p0,
+    I2C_SDA = p1,
+
+    SPI1_MOSI = p3,
+    SPI1_MISO = p4,
+    SPI1_CLK = p5,
+    SPI1_CS = p6,
+
+    SPI2_MOSI = p7,
+    SPI2_MISO = p8,
+    SPI2_CLK = p9,
+    SPI2_CS = p10,
+	
+    UART2_RX = p11,
+    UART2_TX = p12,
+
+    UART1_RX = p13,
+    UART1_TX = p18,
+    UART1_CTS = p12,
+    UART1_RTS = p11,
+
     // mBed interface Pins
     USBTX = UART1_TX,
     USBRX = UART1_RX,
@@ -117,7 +125,7 @@ typedef enum {
     PullNone = 0,
     PullDown = 1,
     PullUp = 2,  
-    PullDefault = PullDown 
+    PullDefault = PullDown // PullDown is default mode
 } PinMode;
 
 

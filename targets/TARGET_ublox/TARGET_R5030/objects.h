@@ -61,7 +61,11 @@ struct i2c_s {
     volatile struct i2c_ss *reg_base;
     PinName i2c_sda_pin;
     PinName i2c_scl_pin;
+};
 
+struct spi_s {
+    volatile struct spi_ss *reg_base;
+    uint32_t timeout;
 };
 
 #include "gpio_object.h"
