@@ -194,7 +194,7 @@ int spi_master_block_write(spi_t *obj, const char *tx_buffer, int tx_length, cha
 *****************************************************************************/
 int spi_slave_receive(spi_t *obj)
 {
-    return bit_status(obj->reg_base->sr, SPI_SR_SR_RXNOEMPTY_OFFSET) == 1 ? 1 : 0;
+    return bit_status(obj->reg_base->sr, SPI_SR_SR_RXNOTEMPTY_OFFSET) == 1 ? 1 : 0;
 }
 
 /*****************************************************************************

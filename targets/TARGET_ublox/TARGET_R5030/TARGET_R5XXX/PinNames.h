@@ -70,9 +70,6 @@ typedef enum {
     LED5 = p5,
     LED6 = p6,
 
-    I2C_SCL = p0,
-    I2C_SDA = p1,
-
     SPI1_MOSI = p3,
     SPI1_MISO = p4,
     SPI1_CLK = p5,
