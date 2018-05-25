@@ -95,6 +95,7 @@ void SystemInit (void)
 /* ToDo: add code to initialize the system
          do not use global variables because this function is called before
          reaching pre-main. RW section maybe overwritten afterwards.          */
+  SCB->VTOR = 0x60000000;
   SystemCoreClock = __SYSTEM_CLOCK;
   ExternalClock = __EXTERNAL_CLOCK;
 }

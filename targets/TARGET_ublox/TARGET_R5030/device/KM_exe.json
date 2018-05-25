@@ -1,0 +1,10 @@
+{
+    "name": "KM",
+    "config": {
+        "XF_PSRAM": {
+			"macro_name": "KM_XF_PSRAM",
+            "help": "Code execute from PSRAM",
+            "value": true
+        }
+    }
+}
