@@ -54,7 +54,7 @@
         PUBLIC  __Vectors_Size
 
         DATA
-__Vectors
+__vector_table
         DCD     sfe(CSTACK)
         DCD     Reset_Handler
         DCD     NMI_Handler
