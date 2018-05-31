@@ -55,6 +55,6 @@
         "asm": [],
         "c": ["--vla"],
         "cxx": ["--guard_calls", "--no_static_destruction"],
-        "ld": ["--skip_dynamic_initialization", "--threaded_lib"]
+		"ld":  ["--skip_dynamic_initialization", "--threaded_lib", "--entry=Reset_Handler","--config_def EXE_CODE_PSRAM=0"] 
     }
 }

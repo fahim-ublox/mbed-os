@@ -124,6 +124,10 @@ __Vectors_End
 __Vectors                           EQU   __vector_table
 __Vectors_Size                      EQU   __Vectors_End - __Vectors
 
+#if  KM_XF_PSRAM
+EXE_CODE_PSRAM    DCB  1
+    PUBLIC  ?EXE_CODE_PSRAM
+#endif
 ; Default handlers.
         THUMB
 
