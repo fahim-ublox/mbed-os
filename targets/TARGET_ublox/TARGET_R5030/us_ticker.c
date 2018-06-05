@@ -22,8 +22,7 @@
  *     whereas TIMER2 runs at 26 MHz (not 1 MHz) and so actually
  *     has a range/resolution of 32 bits at 0.038 useconds.  Software
  *     has to compensate for this. We configured our timer for 16 bit
- *     and it's count down.
- */
+ *     and it's count down. */
 
 #include "us_ticker_api.h"
 #include "mbed_critical.h"
@@ -45,8 +44,8 @@
 #define USECONDS_PER_FULL_TIMER2_RUN 2520
 
 /* Update number of counts down timer gone through */
-#define READ_TMR_CNTS_ELAPSED()		\
-		((timer_base->timer2_load) - (timer_base->timer2_value)) + g_us_overflow;
+#define READ_TMR_CNTS_ELAPSED() \
+        ((timer_base->timer2_load) - (timer_base->timer2_value)) + g_us_overflow;
 /* ----------------------------------------------------------------
  * TYPES
  * ----------------------------------------------------------------*/
@@ -64,6 +63,7 @@ static uint32_t g_us_overflow = 0;
 /* The number of useconds to increment the by at each interrupt */
 static uint32_t g_us_overflow_increment = USECONDS_PER_FULL_TIMER2_RUN;
 
+
 /* Keep track of extra loops required to represent a particular time
  * as the HW timer runs faster than 1 MHz */
 static uint32_t g_timer_extra_loops_required = 0;
@@ -74,6 +74,8 @@ static uint32_t g_user_interrupt_offset = 0;
 
 /* Flag that a user timer is running */
 static bool g_user_interrupt = false;
+volatile struct timer_s *timer_base;
+
 volatile struct timer_s *timer_base;
 
 /* ----------------------------------------------------------------
@@ -182,20 +184,20 @@ uint32_t us_ticker_read()
     /* Disable interrupts to avoid collisions */
     core_util_critical_section_enter();
 
-    /* If TIMER2 is overflowed (value > load register) value so it means
-     * it get overflowed and if not we just take counts elapsed from starting
-     * value as it coun-down timer simple value would not give us counts */
-	if(timer_base->timer2_load < timer_base->timer2_value)
-	{
-		/* Overflow condition */
-		timeValue = timer_base->timer2_load + READ_TMR_CNTS_ELAPSED();
-	}
-	else
-	{
-    	timeValue = READ_TMR_CNTS_ELAPSED();
-	}
+    /* If TIMER2 (value > load_register) so it means it get over-flosw 
+     * and if not we just take counts elapsed from starting value as it 
+     * count-down so timer simple value would not give us counts */
+    if (timer_base->timer2_load < timer_base->timer2_value)
+    {
+        /* Overflow condition */
+        timeValue = timer_base->timer2_load + READ_TMR_CNTS_ELAPSED();
+    }
+    else
+    {
+        timeValue = READ_TMR_CNTS_ELAPSED();
+    }
 
-    	/* Put interrupts back */
+    /* Put interrupts back */
     core_util_critical_section_exit();
 
     return timeValue;
@@ -284,8 +286,8 @@ void us_ticker_clear_interrupt(void)
 const ticker_info_t* us_ticker_get_info()
 {
     static const ticker_info_t info = {
-		CLOCK_TICKS_PER_US*1000000,		// Frequency
-		CONFIG_SIZE_OF_TIMER			// TIMER2 size
+        CLOCK_TICKS_PER_US*1000000,		// Frequency
+        CONFIG_SIZE_OF_TIMER			// TIMER2 size
     };
     return &info;
 }
