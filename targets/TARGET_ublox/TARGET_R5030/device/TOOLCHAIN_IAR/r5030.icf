@@ -1,11 +1,11 @@
 /* Sizes and locations */
-define symbol ITCM_START            = 0x00000000;       
-define symbol PSRAM_START           = 0x60000400;         
-define symbol __size_flash__        = 0x100000;			//64K
-define symbol __start_ram__         = 0x20000000;       
+define symbol ITCM_START            = 0x00000000;
+define symbol PSRAM_START           = 0x60000400;
+define symbol __size_flash__        = 0x100000;         //64K
+define symbol __start_ram__         = 0x20000000;
 define symbol __size_ram__          = 0x10000;
 define symbol __size_flash_vtable__ = 0xF8;
-define symbol __size_ram_vtable__   = 0xF8;  /* (F8=184)Reserve space for dynamic vectors mapped to RAM (see cmsis_nvic.c) */
+define symbol __size_ram_vtable__   = 0xF8;             /* (F8=184)Reserve space for dynamic vectors mapped to RAM (see cmsis_nvic.c) */
 export symbol PSRAM_START;
 export symbol EXE_CODE_PSRAM;
 
