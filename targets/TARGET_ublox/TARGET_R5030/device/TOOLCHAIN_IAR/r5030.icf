@@ -1,11 +1,19 @@
 /* Sizes and locations */
-
-define symbol __start_flash__       = 0x00000000;
-define symbol __size_flash__        = 0x10000;			//64K
+define symbol ITCM_START            = 0x00000000;
+define symbol PSRAM_START           = 0x60000400;
+define symbol __size_flash__        = 0x100000;         //64K
 define symbol __start_ram__         = 0x20000000;
 define symbol __size_ram__          = 0x10000;
 define symbol __size_flash_vtable__ = 0xF8;
-define symbol __size_ram_vtable__   = 0xF8;  /* (B8=184)Reserve space for dynamic vectors mapped to RAM (see cmsis_nvic.c) */
+define symbol __size_ram_vtable__   = 0xF8;             /* (F8=184)Reserve space for dynamic vectors mapped to RAM (see cmsis_nvic.c) */
+export symbol PSRAM_START;
+export symbol EXE_CODE_PSRAM;
+
+if (EXE_CODE_PSRAM) {
+  define symbol __start_flash__        = PSRAM_START;  //for PSRAM 
+} else {
+  define symbol __start_flash__        = ITCM_START;
+}
 
 if (isdefinedsymbol(__stack_size__)) {
   define symbol __size_cstack__        = __stack_size__;
@@ -44,13 +52,13 @@ define block ZI         { zi };
 
 /* Place sections */
 
-initialize by copy { readwrite };
+initialize by copy { readwrite, zi };
 initialize by copy { section .intvec };
 do not initialize  { section .noinit };
 
 //place at address mem:__region_INTVEC_FLASH_start__  { section .intvec }; /* */
-place in VEC_region  { section .intvec }; 
-place in FLASH_region  { readonly };
+place in VEC_region    { section .intvec }; 
+place in FLASH_region  { readonly};
 place in DATA_region   { block RW };
 place in DATA_region   { block ZI };
 place in DATA_region   { last block HEAP };

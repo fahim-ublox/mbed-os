@@ -56,8 +56,8 @@
 
 #define __SYSTEM_CLOCK    (26000000UL)
 #define __EXTERNAL_CLOCK    (1000000UL)
-
-
+extern uint32_t PSRAM_START;
+extern uint32_t EXE_CODE_PSRAM;
 /*----------------------------------------------------------------------------
   Clock Variable definitions
  *----------------------------------------------------------------------------*/
@@ -95,6 +95,11 @@ void SystemInit (void)
 /* ToDo: add code to initialize the system
          do not use global variables because this function is called before
          reaching pre-main. RW section maybe overwritten afterwards.          */
+/*	If execut from PSRAM is enable at linker config file init vector table pointer
+    properly by default VTOR is initialized to zero on reset. */
+  if((uint32_t)((uint32_t *)&EXE_CODE_PSRAM)){
+    SCB->VTOR = (uint32_t)((uint32_t *)&PSRAM_START);
+  }
   SystemCoreClock = __SYSTEM_CLOCK;
   ExternalClock = __EXTERNAL_CLOCK;
 }

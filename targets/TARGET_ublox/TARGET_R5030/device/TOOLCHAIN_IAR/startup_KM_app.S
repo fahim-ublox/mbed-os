@@ -23,7 +23,6 @@
 ; * limitations under the License.
 ; */
 
-
 ;
 ; The modules in this file are included in the libraries, and may be replaced
 ; by any user-defined modules that define the PUBLIC symbol _program_start or
@@ -39,22 +38,23 @@
 ;
 ; Cortex-M version
 ;
-        MODULE  ?cstartup
+        MODULE  ?vector_table
         ; Stack size default : 1024
         ; Heap size default : 2048
         ; Forward declaration of sections.
         SECTION CSTACK:DATA:NOROOT(3)
 
-        SECTION .intvec:CODE:NOROOT(4)
+        SECTION .intvec:CODE:NOROOT(2)
         EXTERN  __iar_program_start
         EXTERN  SystemInit
-        ;PUBLIC  __vector_table
+        EXTERN  main
+        PUBLIC  __vector_table
         PUBLIC  __Vectors
         PUBLIC  __Vectors_End
         PUBLIC  __Vectors_Size
 
         DATA
-__Vectors
+__vector_table
         DCD     sfe(CSTACK)
         DCD     Reset_Handler
         DCD     NMI_Handler
@@ -121,9 +121,13 @@ __Vectors
     DCD    APP_CPU_APP_IRQ_AC_PWR_ALERT_IRQHandler
 
 __Vectors_End
-
+__Vectors                           EQU   __vector_table
 __Vectors_Size                      EQU   __Vectors_End - __Vectors
 
+#if  KM_XF_PSRAM
+EXE_CODE_PSRAM    DCB  1
+    PUBLIC  ?EXE_CODE_PSRAM
+#endif
 ; Default handlers.
         THUMB
 
