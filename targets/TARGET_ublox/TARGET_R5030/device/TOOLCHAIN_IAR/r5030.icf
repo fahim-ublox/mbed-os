@@ -1,5 +1,4 @@
 /* Sizes and locations */
-//define symbol EXE_CODE_PSRAM        = 1;              // it should be un commented txt section need to be plaeced in PSRAM
 define symbol ITCM_START            = 0x00000000;       
 define symbol PSRAM_START           = 0x60000400;         
 define symbol __size_flash__        = 0x100000;			//64K
