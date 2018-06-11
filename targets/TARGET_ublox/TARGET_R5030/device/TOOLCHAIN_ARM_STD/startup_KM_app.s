@@ -38,6 +38,7 @@
 ;//-------- <<< Use Configuration Wizard in Context Menu >>> ------------------
 ;*/
 
+//#define PSRAM_CONFIG_BINARY //this macro needs to be defined when compiling the psram_config binary. For other applications, comment it out.
 
 ; <h> Stack Configuration
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
@@ -144,7 +145,7 @@ __Vectors_End
 __Vectors_Size  EQU     __Vectors_End - __Vectors
 
                 AREA    |.text|, CODE, READONLY
-
+				ENTRY
 
 ; Reset Handler
 
@@ -155,7 +156,15 @@ Reset_Handler   PROC
                 EXPORT  Reset_Handler             [WEAK]
                 IMPORT  SystemInit
                 IMPORT  __main
-                LDR     R0, =SystemInit
+#ifdef PSRAM_CONFIG_BINARY
+                LDR 	R1, = 0x4960002C ; address width register of PSRAM. It is 0 when PSRAM in uninitialized
+                LDR 	R2,[R1] ; read value of address width register
+                CMP 	R2, #0 ; check if it is zero
+                BEQ		Init_PSRAM ; if zero, proceed executing the program. This program initailizes the PSRAM and in the end performs a core reset
+				B       . ; if non-zero, it means PSRAM is already initialized so loop here and do nothing. At this stage, we can load the second program
+Init_PSRAM
+#endif
+      			LDR     R0, =SystemInit
                 BLX     R0
                 LDR     R0, =__main
                 BX      R0
