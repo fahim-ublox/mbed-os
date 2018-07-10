@@ -79,12 +79,12 @@ typedef enum {
 
 static const PinToChannel PinChannelMap[] = {
     {LED0, 0},
-    /*{LED1, 1},  // Commented for SPI testing
+    {LED1, 1},  
     {LED2, 2},
     {LED3, 3},
     {LED4, 4},
     {LED5, 5},
-    {LED6, 6},*/
+    {LED6, 6},
     {UART1_RX, 42},
     {UART1_TX, 43},
     {UART1_CTS, 44},
@@ -106,12 +106,12 @@ static const PinToChannel PinChannelMap[] = {
 
 static const PinToPeripheral PinPeripheralMap[] = {
     {LED0, PIO_MUX_GPIO},
-    /*{LED1, PIO_MUX_GPIO},  // Commented for SPI testing
+    {LED1, PIO_MUX_GPIO},  
     {LED2, PIO_MUX_GPIO},
     {LED3, PIO_MUX_GPIO},
     {LED4, PIO_MUX_GPIO},
     {LED5, PIO_MUX_GPIO},
-    {LED6, PIO_MUX_GPIO},*/
+    {LED6, PIO_MUX_GPIO},
     {UART1_RX, PIO_MUX_PERIPH_0},
     {UART1_TX, PIO_MUX_PERIPH_0},
     {UART1_CTS, PIO_MUX_PERIPH_0},
