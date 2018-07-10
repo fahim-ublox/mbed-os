@@ -161,7 +161,7 @@ Reset_Handler   PROC
                 LDR 	R2,[R1] ; read value of address width register
                 CMP 	R2, #0 ; check if it is zero
                 BEQ		Init_PSRAM ; if zero, proceed executing the program. This program initailizes the PSRAM and in the end performs a core reset
-				B       . ; if non-zero, it means PSRAM is already initialized so loop here and do nothing. At this stage, we can load the second program
+                B       . ; if non-zero, it means PSRAM is already initialized so loop here and do nothing. At this stage, we can load the second program
 Init_PSRAM
 #endif
       			LDR     R0, =SystemInit

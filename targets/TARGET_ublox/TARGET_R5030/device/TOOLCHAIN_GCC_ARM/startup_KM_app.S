@@ -285,7 +285,7 @@ Reset_Handler:
     ldr 	R2,[R1] // read value of address width register
     cmp 	R2, #0 // check if it is zero
     beq		Init_PSRAM // if zero, proceed executing the program. This program initailizes the PSRAM and in the end performs a core reset
-	b       . // if non-zero, it means PSRAM is already initialized so loop here and do nothing. At this stage, we can load the second program
+    b       . // if non-zero, it means PSRAM is already initialized so loop here and do nothing. At this stage, we can load the second program
 Init_PSRAM:
 #endif
 
