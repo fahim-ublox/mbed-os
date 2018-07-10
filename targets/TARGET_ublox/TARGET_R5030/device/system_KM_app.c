@@ -95,8 +95,9 @@ void SystemInit (void)
 /* ToDo: add code to initialize the system
          do not use global variables because this function is called before
          reaching pre-main. RW section maybe overwritten afterwards.          */
-  SystemCoreClock = __SYSTEM_CLOCK;
-  ExternalClock = __EXTERNAL_CLOCK;
+    SCB->VTOR = (uint32_t)NVIC_FLASH_VECTOR_ADDRESS; //VTOR is required to be changed if code is placed at address other than 0x00000000 
+    SystemCoreClock = __SYSTEM_CLOCK;
+    ExternalClock = __EXTERNAL_CLOCK;
 }
 
 // Initializes the System Timer and its interrupt, and starts the System Tick Timer.

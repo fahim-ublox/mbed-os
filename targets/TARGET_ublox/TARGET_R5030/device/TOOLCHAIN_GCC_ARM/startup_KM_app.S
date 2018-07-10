@@ -34,6 +34,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE.
    ---------------------------------------------------------------------------*/
+
+//#define PSRAM_CONFIG_BINARY //this macro needs to be defined when compiling the psram_config binary. For other applications, comment it out.
 #define __STARTUP_CLEAR_BSS
 
     .syntax    unified
@@ -277,6 +279,15 @@ Reset_Handler:
     bgt    .L_loop3
 .L_loop3_done:
 #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
+
+#ifdef PSRAM_CONFIG_BINARY
+    ldr 	R1, = 0x4960002C // address width register of PSRAM. It is 0 when PSRAM in uninitialized
+    ldr 	R2,[R1] // read value of address width register
+    cmp 	R2, #0 // check if it is zero
+    beq		Init_PSRAM // if zero, proceed executing the program. This program initailizes the PSRAM and in the end performs a core reset
+    b       . // if non-zero, it means PSRAM is already initialized so loop here and do nothing. At this stage, we can load the second program
+Init_PSRAM:
+#endif
 
 #ifndef __NO_SYSTEM_INIT
     bl    SystemInit
