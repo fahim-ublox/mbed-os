@@ -54,7 +54,7 @@
 //#define __XTAL            (300000000UL)    /* Oscillator frequency             */
 //#define __SYS_OSC_CLK     (    ___HSI)    /* Main oscillator frequency        */
 
-#define __SYSTEM_CLOCK    (26000000UL)
+#define __SYSTEM_CLOCK    (5200000UL)
 #define __EXTERNAL_CLOCK    (1000000UL)
 
 

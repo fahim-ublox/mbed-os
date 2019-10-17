@@ -25,7 +25,7 @@
 #define SPI1_BASE    app_ss_app_spi1
 #define SPI2_BASE    app_ss_app_spi2
 
-#define PerCLK   26000000UL // Peripheral clock
+#define PerCLK   5200000UL // Peripheral clock
 #define PCLK    PerCLK // APB clock
 
 
