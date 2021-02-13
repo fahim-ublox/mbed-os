@@ -200,20 +200,20 @@ Reset_Handler:
  *
  *  All addresses must be aligned to 4 bytes boundary.
  */
-    ldr    r1, =__etext
-    ldr    r2, =__data_start__
-    ldr    r3, =__data_end__
-
-    subs    r3, r2
-    ble    .L_loop1_done
-
-.L_loop1:
-    subs    r3, #4
-    ldr    r0, [r1,r3]
-    str    r0, [r2,r3]
-    bgt    .L_loop1
-
-.L_loop1_done:
+@    ldr    r1, =__etext
+@    ldr    r2, =__data_start__
+@    ldr    r3, =__data_end__
+@
+@    subs    r3, r2
+@    ble    .L_loop1_done
+@
+@.L_loop1:
+@    subs    r3, #4
+@    ldr    r0, [r1,r3]
+@    str    r0, [r2,r3]
+@    bgt    .L_loop1
+@
+@.L_loop1_done:
 #endif /*__STARTUP_COPY_MULTIPLE */
 
 /*  This part of work usually is done in C library startup code. Otherwise,
@@ -263,19 +263,19 @@ Reset_Handler:
  *
  *  Both addresses must be aligned to 4 bytes boundary.
  */
-    ldr    r1, =__bss_start__
-    ldr    r2, =__bss_end__
-
-    movs    r0, 0
-
-    subs    r2, r1
-    ble    .L_loop3_done
-
-.L_loop3:
-    subs    r2, #4
-    str    r0, [r1, r2]
-    bgt    .L_loop3
-.L_loop3_done:
+@    ldr    r1, =__bss_start__
+@    ldr    r2, =__bss_end__
+@
+@    movs    r0, 0
+@
+@    subs    r2, r1
+@    ble    .L_loop3_done
+@
+@.L_loop3:
+@    subs    r2, #4
+@    str    r0, [r1, r2]
+@    bgt    .L_loop3
+@.L_loop3_done:
 #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
 
 #ifndef __NO_SYSTEM_INIT
